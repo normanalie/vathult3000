@@ -15,7 +15,7 @@ void setup() {
   // Init serial link
   Serial.begin(9600);
   Serial.println(F("========================================================================"));
-  Serial.println(F("             Proto v0.1 : Smart multi zones watering system             "));
+  Serial.println(F("       VATHULT3000 v0.1 : Smart multi zones watering system             "));
   Serial.println(F("========================================================================"));
   Serial.println("");
 
