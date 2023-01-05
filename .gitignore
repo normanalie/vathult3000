@@ -50,3 +50,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+firmware/main/esp32s2.svd
+firmware/main/debug.cfg
+firmware/main/debug_custom.json

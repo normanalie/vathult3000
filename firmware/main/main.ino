@@ -38,9 +38,9 @@ void setup() {
   outputBoard.pinMode(P7, OUTPUT, LOW);
 
   // Config Interface Board
-  interfaceBoard.pinMode(P0, INPUT)
-  interfaceBoard.pinMode(P1, INPUT)
-  interfaceBoard.pinMode(P2, INPUT)
+  interfaceBoard.pinMode(P0, INPUT);
+  interfaceBoard.pinMode(P1, INPUT);
+  interfaceBoard.pinMode(P2, INPUT);
 
 
   // Init Input Board
