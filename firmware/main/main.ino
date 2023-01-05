@@ -28,14 +28,14 @@ void setup() {
   inputBoard.pinMode(P5, INPUT);
 
   // Config Output Board
-  outputBoard.pinMode(P0, OUTPUT, LOW);
-  outputBoard.pinMode(P1, OUTPUT, LOW);
-  outputBoard.pinMode(P2, OUTPUT, LOW);
-  outputBoard.pinMode(P3, OUTPUT, LOW);
-  outputBoard.pinMode(P4, OUTPUT, LOW);
-  outputBoard.pinMode(P5, OUTPUT, LOW);
-  outputBoard.pinMode(P6, OUTPUT, LOW);
-  outputBoard.pinMode(P7, OUTPUT, LOW);
+  outputBoard.pinMode(P0, OUTPUT, HIGH);  //Active LOW logic
+  outputBoard.pinMode(P1, OUTPUT, HIGH);
+  outputBoard.pinMode(P2, OUTPUT, HIGH);
+  outputBoard.pinMode(P3, OUTPUT, HIGH);
+  outputBoard.pinMode(P4, OUTPUT, HIGH);
+  outputBoard.pinMode(P5, OUTPUT, HIGH);
+  outputBoard.pinMode(P6, OUTPUT, HIGH);
+  outputBoard.pinMode(P7, OUTPUT, HIGH);
 
   // Config Interface Board
   interfaceBoard.pinMode(P0, INPUT);
