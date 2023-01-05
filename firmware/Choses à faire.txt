@@ -1,0 +1,11 @@
+(Pas le plus important) Connexion au Wi-Fi (Portail Captif)
+
+* Lire les capteurs en I2C
+* Lire le capteur d'infilatration analog (GPIO 6, 7 ou 8 pour connexion)
+Commander les électrovannes et la pompe en I2C (Par bouton pour le test) [Carte des sortie]
+Lire les boutons
+Afficher sur l'écran
+
+
+
+Eric Peronnin (Pour savoir tout sur Arduino)
