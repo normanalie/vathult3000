@@ -1,13 +1,14 @@
 #include <PCF8574.h>
-#define INPUT_BOARD_ADRESS 0x20       // 000 (@ bin)
-#define OUTPUT_BOARD_ADRESS 0x21      // 001 (@ bin)
-#define INTERFACE_BOARD_ADRESS 0x22   // 010 (@ bin)
+
+#define INPUT_BOARD_ADDRESS 0x20       // 000 (@ bin)
+#define OUTPUT_BOARD_ADDRESS 0x21      // 001 (@ bin)
+#define INTERFACE_BOARD_ADDRESS 0x22   // 010 (@ bin)
 #define WATER_INFILTRATION_PIN 8      // Analog Water Infilitration Sensor
 
 
-PCF8574 inputBoard(INPUT_BOARD_ADRESS);
-PCF8574 outputBoard(OUTPUT_BOARD_ADRESS);
-PCF8574 interfaceBoard(INTERFACE_BOARD_ADRESS);
+PCF8574 inputBoard(INPUT_BOARD_ADDRESS);
+PCF8574 outputBoard(OUTPUT_BOARD_ADDRESS);
+PCF8574 interfaceBoard(INTERFACE_BOARD_ADDRESS);
 
 
 void setup() {
@@ -45,37 +46,40 @@ void setup() {
 
   // Init Input Board
   Serial.print(F("Input Board Init @ 0x"));
-  Serial.print(INPUT_BOARD_ADRESS, HEX);
+  Serial.print(INPUT_BOARD_ADDRESS, HEX);
   Serial.print(F(" : "));
   if (inputBoard.begin()){
     Serial.println(F("Success !"));
   } else {
     Serial.println(F("Failure..."));
     Serial.println(F("Program shutdown"));
+    //TODO: Proper error handling
     while(1);
   }
 
   // Init Output Board
   Serial.print(F("Output Board Init @ 0x"));
-  Serial.print(OUTPUT_BOARD_ADRESS, HEX);
+  Serial.print(OUTPUT_BOARD_ADDRESS, HEX);
   Serial.print(F(" : "));
   if (outputBoard.begin()){
     Serial.println(F("Success !"));
   } else {
     Serial.println(F("Failure..."));
     Serial.println(F("Program shutdown"));
+    //TODO: Proper error handling
     while(1);
   }
 
   // Init Interface Board
   Serial.print(F("Interface Board Init @ 0x"));
-  Serial.print(INTERFACE_BOARD_ADRESS, HEX);
+  Serial.print(INTERFACE_BOARD_ADDRESS, HEX);
   Serial.print(F(" : "));
   if (interfaceBoard.begin()){
     Serial.println(F("Success !"));
   } else {
     Serial.println(F("Failure..."));
     Serial.println(F("Program shutdown"));
+    //TODO: Proper error handling
     while(1);
   }
   
@@ -88,6 +92,7 @@ void loop() {
   
   if (waterInfiltrationValue >= 620) {   // 620 ~ 0.5V
     Serial.println(F("! WARNING ! = Water infiltration detected! Program shutdown."));
+    //TODO: Put system in a secure state.
     while(1);
   }
 
