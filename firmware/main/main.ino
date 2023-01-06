@@ -1,24 +1,14 @@
 #include <PCF8574.h>
 #include <Adafruit_SSD1306.h>
+#include "config_esp8266.h"
 
-#define INPUT_BOARD_ADDRESS 0x20       // 000 (@ bin)
-#define OUTPUT_BOARD_ADDRESS 0x21      // 001 (@ bin)
-#define INTERFACE_BOARD_ADDRESS 0x22   // 010 (@ bin)
-#define OLED_DISPLAY_ADDRESS 0x3C      // 0x3C or 0x3D (! CAREFUL ! : Address on hardware =/= Address to use)
-#define WATER_INFILTRATION_PIN 8       // Analog Water Infilitration Sensor
-
-#define SDA 3   // GPIO 1
-#define SCL 4   // GPIO 2
-
-#define INT_1B 5         // Interrupt pin or Interface Board
-
-void IRAM_ATTR inter();
-bool interrupt = false;
+void IRAM_ATTR int1();
+bool interfaceINT = false;
 
 
 PCF8574 inputBoard(INPUT_BOARD_ADDRESS, SDA, SCL);
 PCF8574 outputBoard(OUTPUT_BOARD_ADDRESS, SDA, SCL);
-PCF8574 interfaceBoard(INTERFACE_BOARD_ADDRESS, SDA, SCL, INT_1B, inter);
+PCF8574 interfaceBoard(INTERFACE_BOARD_ADDRESS, SDA, SCL, INT_1B, int1);
 Adafruit_SSD1306 oledDisplay(128, 64, &Wire, -1);
 
 
@@ -128,15 +118,15 @@ void loop() {
 
 
   // Buttons test
-  if(interrupt){
-    interrupt = false;
-    if(!pcf.digitalRead(P0)){
+  if(interfaceINT){
+    interfaceINT = false;
+    if(!interfaceBoard.digitalRead(P0)){
       Serial.println("RIGHT>>");
     }
-    if(!pcf.digitalRead(P1)){
+    if(!interfaceBoard.digitalRead(P1)){
       Serial.println("CENTER");
     }
-    if(!pcf.digitalRead(P2)){
+    if(!interfaceBoard.digitalRead(P2)){
       Serial.println("<<LEFT");
     }
   }
@@ -145,8 +135,8 @@ void loop() {
 
 
 
-void IRAM_ATTR inter() {
-  interrupt = true;
+void IRAM_ATTR int1() {
+  interfaceINT = true;
   return;
 }
 
