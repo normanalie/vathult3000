@@ -2,6 +2,8 @@
 #include <Adafruit_SSD1306.h>
 #include "config_esp8266.h"
 
+#include "screen.h"
+
 void IRAM_ATTR int1();
 bool interfaceINT = false;
 
@@ -55,7 +57,7 @@ void setup() {
     Serial.println(F("Failure..."));
     Serial.println(F("Program shutdown"));
     //TODO: Proper error handling
-    while(1);
+    //while(1);
   }
 
   // Init Output Board
@@ -68,7 +70,7 @@ void setup() {
     Serial.println(F("Failure..."));
     Serial.println(F("Program shutdown"));
     //TODO: Proper error handling
-    while(1);
+    //while(1);
   }
 
   // Init Interface Board
@@ -81,7 +83,7 @@ void setup() {
     Serial.println(F("Failure..."));
     Serial.println(F("Program shutdown"));
     //TODO: Proper error handling
-    while(1);
+    //while(1);
   }
 
   // Init OLED Display

@@ -7,7 +7,8 @@ OLED Display Program (Test)
 TODO : Time showed on menu should be the real time, not a static string
 */ 
 
-#include "U8glib.h"
+#include <U8glib.h>
+#include <PCF8574.h>
 
 // All the arrays below are generated from images using image2cpp website
 
@@ -126,8 +127,8 @@ const unsigned char* bitmap_ui_style[3] = {
 
 /* ------------------ End generated bitmaps from image2cpp --------------------------------- */
 
-#define NUM_ITEMS = 5;        // Number of items in the list
-#define MAX_ITEM_LENGTH = 20; // Maximum characters for the item name
+#define NUM_ITEMS 5        // Number of items in the list
+#define MAX_ITEM_LENGTH 20 // Maximum characters for the item name
 
 
 char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {  // array with item names
@@ -151,7 +152,7 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {  // array with item names
 
 #define INT_1B 5         // Interrupt pin or Interface Board
 
-PCF8574 interfaceBoard(INTERFACE_BOARD_ADDRESS, SDA, SCL, INT_1B, inter);
+PCF8574 interfaceBoard(INTERFACE_BOARD_ADDRESS, SDA, SCL);
 //Adafruit_SSD1306 oledDisplay(128, 64, &Wire, -1);
 U8GLIB_SSD1306_128X64 oledDisplay(U8G_I2C_OPT_DEV_0 | U8G_I2C_OPT_NO_ACK | U8G_I2C_OPT_FAST);   // Fast I2C / TWI
 
@@ -168,7 +169,7 @@ int current_screen = 0;     // 0 = Menu, 1 = Screenshot
 int wifi_status = 1;        // 0 = No Wi-Fi ; 1 = Working Wi-Fi
 int warnings = 0;           // Number of warnings happened
 int errors = 0;             // Number of errors happened
-char ui_time[5] = "12:12"   // {EXPERIMANTAL} Change this to the actual time, not a static one
+char ui_time[5] = "12:12" ;  // {EXPERIMANTAL} Change this to the actual time, not a static one
 
 void setup() {
 
@@ -179,14 +180,14 @@ void setup() {
   interfaceBoard.pinMode(P1, INPUT);
   interfaceBoard.pinMode(P2, INPUT);
 
-  interfaceBoard.begin()
-  //oledDisplay.begin() ?
+  interfaceBoard.begin();
+  //oledDisplay.begin(); 
 
-  u8g.setColorIndex(1);   // Set the color to white
+  oledDisplay.setColorIndex(1);   // Set the color to white
 }
 
 
-void main() {
+void loop() {
 
   if (current_screen == 0) { // MENU SCREEN
 
@@ -249,12 +250,12 @@ void main() {
     // Warnings status icon
     oledDisplay.drawBitmapP(43, 2, 10/8, 10, bitmap_status_icons[3]);
     oledDisplay.setFont(u8g_font_7x14);
-    oledDisplay.drawStr(35, 12, String(warnings) );
+    oledDisplay.drawStr(35, 12, (char*)warnings );
 
     // Errors status icon
     oledDisplay.drawBitmapP(74, 2, 10/8, 10, bitmap_status_icons[0]);
     oledDisplay.setFont(u8g_font_7x14);
-    oledDisplay.drawStr(66, 12, String(errors) );
+    oledDisplay.drawStr(66, 12, (char*)errors );
 
     // Time
     oledDisplay.setFont(u8g_font_7x14);
