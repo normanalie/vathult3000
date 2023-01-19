@@ -7,7 +7,7 @@ OLED Display Program (Test)
 TODO : Time showed on menu should be the real time, not a static string
 */ 
 
-#include <U8glib.h>
+#include <U8g2lib.h>
 #include <PCF8574.h>
 
 // All the arrays below are generated from images using image2cpp website
@@ -154,7 +154,8 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {  // array with item names
 
 PCF8574 interfaceBoard(INTERFACE_BOARD_ADDRESS);
 //Adafruit_SSD1306 oledDisplay(128, 64, &Wire, -1);
-U8GLIB_SSD1306_128X64 oledDisplay(U8G_I2C_OPT_DEV_0 | U8G_I2C_OPT_NO_ACK | U8G_I2C_OPT_FAST);   // Fast I2C / TWI
+//U8GLIB_SSD1306_128X64 oledDisplay(U8G_I2C_OPT_DEV_0 | U8G_I2C_OPT_NO_ACK | U8G_I2C_OPT_FAST);   // U8glib: Fast I2C / TWI
+U8G2_SSD1306_128X64_NONAME_1_HW_I2C oledDisplay (U8G2_R0);     // U8g2: U8G2_SSD1306_128X64_NONAME = OLED Display w/o known brand; 1 = Buffer Size; HW_I2C = Hardware I2C; U8G2_R0= No rotation
 
 int button_up_clicked = 0;      // Only perform action when button is clicked, and wait until another press
 int button_select_clicked = 0;  // Same as above
@@ -173,7 +174,7 @@ char ui_time[6] = "12:12" ;  // {EXPERIMANTAL} Change this to the actual time, n
 
 void setup() {
 
-  Serial.begin(9600);
+  Serial.begin(115200);    // Arduino = 9600; ESP32 = 115200
 
   // Config Interface Board
   interfaceBoard.pinMode(P0, INPUT);
@@ -181,7 +182,7 @@ void setup() {
   interfaceBoard.pinMode(P2, INPUT);
 
   interfaceBoard.begin();
-  oledDisplay.begin(); 
+  oledDisplay.begin();       // (i) Optional for U8glib 
 
   oledDisplay.setColorIndex(1);   // Set the color to white
 
@@ -257,18 +258,18 @@ void loop() {
 
     // Wi-Fi status icon
     if (wifi_status == 1) {
-      oledDisplay.drawBitmapP(2, 2, 20/8, 10, bitmap_status_icons[1]);
+      oledDisplay.drawBitmap(2, 2, 20/8, 10, bitmap_status_icons[1]);
     } else {
-      oledDisplay.drawBitmapP(2, 2, 20/8, 10, bitmap_status_icons[2]);
+      oledDisplay.drawBitmap(2, 2, 20/8, 10, bitmap_status_icons[2]);
     }
 
     // Warnings status icon
-    oledDisplay.drawBitmapP(43, 2, 10/8, 10, bitmap_status_icons[3]);
+    oledDisplay.drawBitmap(43, 2, 10/8, 10, bitmap_status_icons[3]);
     oledDisplay.setFont(u8g_font_7x14);
     oledDisplay.drawStr(35, 12, (char*)warnings );
 
     // Errors status icon
-    oledDisplay.drawBitmapP(74, 2, 10/8, 10, bitmap_status_icons[0]);
+    oledDisplay.drawBitmap(74, 2, 10/8, 10, bitmap_status_icons[0]);
     oledDisplay.setFont(u8g_font_7x14);
     oledDisplay.drawStr(66, 12, (char*)errors );
 
@@ -277,31 +278,31 @@ void loop() {
     oledDisplay.drawStr(94, 11, ui_time);
 
     // Separator bar
-    oledDisplay.drawBitmapP(0, 12, 128/8, 3, bitmap_ui_style[2]);
+    oledDisplay.drawBitmap(0, 12, 128/8, 3, bitmap_ui_style[2]);
 
 
     if (current_screen == 0) { // MENU SCREEN
 
       // Selected item BG
-      oledDisplay.drawBitmapP(0, 32, 128/8, 16, bitmap_ui_style[1]);
+      oledDisplay.drawBitmap(0, 32, 128/8, 16, bitmap_ui_style[1]);
 
       // Previous item as icon + label
       oledDisplay.setFont(u8g_font_7x14);
       oledDisplay.drawStr(19, 27, menu_items[item_sel_previous]); 
-      oledDisplay.drawBitmapP( 4, 17, 11/8, 11, bitmap_icons[item_sel_previous]);          
+      oledDisplay.drawBitmap( 4, 17, 11/8, 11, bitmap_icons[item_sel_previous]);          
 
       // Selected item as icon + label in bold font
       oledDisplay.setFont(u8g_font_7x14B);    
       oledDisplay.drawStr(19, 44, menu_items[item_selected]);   
-      oledDisplay.drawBitmapP( 4, 35, 11/8, 11, bitmap_icons[item_selected]);     
+      oledDisplay.drawBitmap( 4, 35, 11/8, 11, bitmap_icons[item_selected]);     
 
       // Next item as icon + label
       oledDisplay.setFont(u8g_font_7x14);     
       oledDisplay.drawStr(19, 61, menu_items[item_sel_next]);   
-      oledDisplay.drawBitmapP( 4, 51, 11/8, 11, bitmap_icons[item_sel_next]);  
+      oledDisplay.drawBitmap( 4, 51, 11/8, 11, bitmap_icons[item_sel_next]);  
 
       // Scrollbar background
-      oledDisplay.drawBitmapP(124, 14, 4/8, 50, bitmap_ui_style[0]);
+      oledDisplay.drawBitmap(124, 14, 4/8, 50, bitmap_ui_style[0]);
 
       // Scrollbar handle
       oledDisplay.drawBox(125, 50/NUM_ITEMS * item_selected, 3, 50/NUM_ITEMS); 
