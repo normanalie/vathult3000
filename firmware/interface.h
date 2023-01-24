@@ -15,6 +15,8 @@ class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
     bool error = false;
   private:
     char time[6] = "12:12";  // TODO: Take a time object in constructor and uodate time in screen::update
+    void draw_headbar();
+    void draw_home();
 };
 
 #endif
