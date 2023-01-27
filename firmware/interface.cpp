@@ -1,7 +1,6 @@
 #include "interface.h"
 
 Screen::Screen(int sda, int scl): U8G2_SSD1306_128X64_NONAME_1_HW_I2C(U8G2_R0, -1, scl, sda){
-
 }
 
 void Screen::update(){
@@ -15,6 +14,7 @@ void Screen::update(){
 
 void Screen::draw_headbar(){
   this->setFont(u8g_font_7x14); // for sanity
+
   // WiFi
   uint8_t *buf = new uint8_t[2*size_wifi];
   if(buf){
@@ -44,19 +44,56 @@ void Screen::draw_home(){
 
   uint8_t *buf = new uint8_t[2*size_valve];
   if(buf){
-    // Left item
-    memcpy_P(buf, bmp_valve, 2*size_valve);
-    this->drawXBM(10, 31, size_valve, size_valve, buf);
+    switch(this->selected_id){
+      case 0:
+        // Left item
+        memcpy_P(buf, bmp_tool, 2*size_tool);
+        this->drawXBM(10, 31, size_tool, size_tool, buf);
 
-    // Selected item
-    memcpy_P(buf, bmp_temperature, 2*size_temperature);
-    this->drawXBM(56, 31, size_temperature, size_temperature, buf);
-    this->drawStr(48, 55, "Sensors");
-    this->drawFrame(42, 23, 47, 40);
+        // Selected item
+        memcpy_P(buf, bmp_valve, 2*size_valve);
+        this->drawXBM(10, 31, size_valve, size_valve, buf);
+        this->drawStr(48, 55, "Outputs");
+        this->drawFrame(42, 23, 47, 40);
 
-    // Right item
-    memcpy_P(buf, bmp_tool, 2*size_tool);
-    this->drawXBM(102, 31, size_tool, size_tool, buf);   
+        // Right item
+        memcpy_P(buf, bmp_temperature, 2*size_temperature);
+        this->drawXBM(10, 31, size_temperature, size_temperature, buf);  
+      break;
+      case 1:
+        // Left item
+        memcpy_P(buf, bmp_valve, 2*size_valve);
+        this->drawXBM(10, 31, size_valve, size_valve, buf);
+
+        // Selected item
+        memcpy_P(buf, bmp_temperature, 2*size_temperature);
+        this->drawXBM(10, 31, size_temperature, size_temperature, buf);
+        this->drawStr(48, 55, "Sensors");
+        this->drawFrame(42, 23, 47, 40);
+
+        // Right item
+        memcpy_P(buf, bmp_tool, 2*size_tool);
+        this->drawXBM(10, 31, size_tool, size_tool, buf);         
+      break;
+      case 2:
+        // Left item
+        memcpy_P(buf, bmp_temperature, 2*size_temperature);
+        this->drawXBM(10, 31, size_temperature, size_temperature, buf);
+
+        // Selected item
+        memcpy_P(buf, bmp_tool, 2*size_tool);
+        this->drawXBM(10, 31, size_tool, size_tool, buf);
+        this->drawStr(48, 55, "Settings");
+        this->drawFrame(42, 23, 47, 40);
+
+        // Right item
+        memcpy_P(buf, bmp_valve, 2*size_valve);
+        this->drawXBM(10, 31, size_valve, size_valve, buf);         
+      break;
+      default:
+        this->selected_id = 1;
+    }
+    
   }
 
   delete [] buf;
