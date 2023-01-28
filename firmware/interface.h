@@ -20,7 +20,7 @@ class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
     char time[6] = "12:12";  // TODO: Take a time object in constructor and update time in screen::update
     void draw_headbar();
     void draw_home();
-    uint8_t selected_id = 1;
+    uint8_t selected_id = 0;
 };
 
 class Keyboard: public PCF8574{

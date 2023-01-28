@@ -61,13 +61,13 @@ void Screen::draw_home()
 
       // Selected item
       memcpy_P(buf, bmp_valve, 2 * size_valve);
-      this->drawXBM(10, 31, size_valve, size_valve, buf);
+      this->drawXBM(56, 31, size_valve, size_valve, buf);
       this->drawStr(48, 55, "Outputs");
       this->drawFrame(42, 23, 47, 40);
 
       // Right item
       memcpy_P(buf, bmp_temperature, 2 * size_temperature);
-      this->drawXBM(10, 31, size_temperature, size_temperature, buf);
+      this->drawXBM(102, 31, size_temperature, size_temperature, buf);
       break;
     case 1:
       // Left item
@@ -76,13 +76,13 @@ void Screen::draw_home()
 
       // Selected item
       memcpy_P(buf, bmp_temperature, 2 * size_temperature);
-      this->drawXBM(10, 31, size_temperature, size_temperature, buf);
+      this->drawXBM(56, 31, size_temperature, size_temperature, buf);
       this->drawStr(48, 55, "Sensors");
       this->drawFrame(42, 23, 47, 40);
 
       // Right item
       memcpy_P(buf, bmp_tool, 2 * size_tool);
-      this->drawXBM(10, 31, size_tool, size_tool, buf);
+      this->drawXBM(102, 31, size_tool, size_tool, buf);
       break;
     case 2:
       // Left item
@@ -91,13 +91,13 @@ void Screen::draw_home()
 
       // Selected item
       memcpy_P(buf, bmp_tool, 2 * size_tool);
-      this->drawXBM(10, 31, size_tool, size_tool, buf);
+      this->drawXBM(56, 31, size_tool, size_tool, buf);
       this->drawStr(48, 55, "Settings");
       this->drawFrame(42, 23, 47, 40);
 
       // Right item
       memcpy_P(buf, bmp_valve, 2 * size_valve);
-      this->drawXBM(10, 31, size_valve, size_valve, buf);
+      this->drawXBM(102, 31, size_valve, size_valve, buf);
       break;
     }
   }
