@@ -10,7 +10,7 @@ void Screen::update()
   do
   {
     this->draw_headbar();
-    this->draw_home();
+    this->draw_outputs();
   } while (this->nextPage());
   return;
 }
@@ -55,7 +55,7 @@ void Screen::draw_home()
   this->setFont(u8g2_font_squeezed_b7_tr); // for sanity
 
   uint8_t *buf = new uint8_t[2 * size_valve];
-  if (buf)
+  if(buf)
   {
     switch (this->selected_id)
     {
@@ -110,6 +110,35 @@ void Screen::draw_home()
   delete[] buf;
   return;
 }
+
+
+void Screen::draw_outputs(){
+  static int8_t source = -1;
+
+  this->setFont(u8g2_font_squeezed_b7_tr); // for sanity
+  uint8_t *buf = new uint8_t[2 * size_valve];
+  if(buf)
+  {
+    if(source == -1){  // water source not set 
+      /* Select water source */
+      // Back
+      memcpy(buf, bmp_back, 2*size_back);
+      this->drawXBM(0, 20, size_back, size_back, buf);
+      this->drawStr(13, 28, "Back");
+
+      // Tap water (default selection)
+      this->drawStr(13, 43, "Tap water");
+      this->drawFrame(0, 32, 128, 16);
+
+      // Rain water
+      this->drawStr(13, 60, "Rain water");
+    }
+  }
+  delete[] buf;
+  return;
+}
+
+
 
 Keyboard::Keyboard(uint8_t addr, uint8_t sda, uint8_t scl, uint8_t inter_pin) : PCF8574(addr, sda, scl)
 {

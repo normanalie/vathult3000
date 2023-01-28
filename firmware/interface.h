@@ -17,6 +17,7 @@ class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
   public:
     Screen(int sda, int scl);
     void update();
+    void draw_outputs();
     bool wifi_connected = false;
     bool error = false;
     uint8_t selected_id = 0;
