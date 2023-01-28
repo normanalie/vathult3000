@@ -52,9 +52,9 @@ void menu_navigate(){
   static unsigned long t = millis();
   if(millis()-t > 150){
     if(keyboard.isOnlyPressed(BTN_LEFT)){
-      screen.selected_id = screen.selected_id == 0 ? MENU_ITEM_LEN-1 : screen.selected_id-1;
+      screen.nav_left();
     }else if(keyboard.isOnlyPressed(BTN_RIGHT)){
-      screen.selected_id = screen.selected_id == MENU_ITEM_LEN-1 ? 0 : screen.selected_id+1;
+      screen.nav_right();
     }
     t = millis();
   }

@@ -1,7 +1,7 @@
 #include "interface.h"
 
-Screen::Screen(int sda, int scl) : U8G2_SSD1306_128X64_NONAME_1_HW_I2C(U8G2_R0, -1, scl, sda)
-{
+Screen::Screen(int sda, int scl) : U8G2_SSD1306_128X64_NONAME_1_HW_I2C(U8G2_R0, -1, scl, sda){
+
 }
 
 void Screen::update()
@@ -10,8 +10,27 @@ void Screen::update()
   do
   {
     this->draw_headbar();
-    this->draw_outputs();
+    switch(this->current_screen){
+      case HOME:
+        this->draw_home();
+        break;
+      case OUTPUTS:
+        this->draw_outputs();
+        break;
+    }
   } while (this->nextPage());
+  return;
+}
+
+void Screen::nav_left(){
+  this->selected_id = this->selected_id == 0 ? MENU_ITEM_LEN-1 : this->selected_id-1;
+  return;
+}
+void Screen::nav_center(){
+  return;
+}
+void Screen::nav_right(){
+  this->selected_id = this->selected_id == MENU_ITEM_LEN-1 ? 0 : this->selected_id+1;
   return;
 }
 
@@ -152,7 +171,6 @@ void Keyboard::update()
   this->btn_status[0] = !this->digitalRead(P2);  // Right
   this->btn_status[1] = !this->digitalRead(P1);  // Center
   this->btn_status[2] = !this->digitalRead(P0);  // Left
-  Serial.printf("{<LEFT: %d>, <CENTER: %d>, <RIGHT: %d>}\n", this->btn_status[0], this->btn_status[1], this->btn_status[2]);  // Test
   return;
 }
 
