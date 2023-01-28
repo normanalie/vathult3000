@@ -106,28 +106,24 @@ void Screen::draw_home()
   return;
 }
 
-Keyboard::Keyboard(uint8_t addr, uint8_t sda, uint8_t scl, uint8_t inter_pin) : PCF8574(addr, sda, scl, inter_pin, this->inter_handler)
+Keyboard::Keyboard(uint8_t addr, uint8_t sda, uint8_t scl, uint8_t inter_pin) : PCF8574(addr, sda, scl)
 {
   this->pinMode(P0, INPUT_PULLUP);
   this->pinMode(P1, INPUT_PULLUP);
   this->pinMode(P2, INPUT_PULLUP);
 }
 
-int Keyboard::begin()
-{
-  return this->begin();
-}
-
 void Keyboard::update()
 {
-
+  this->btn_status[0] = !this->digitalRead(P2);  // Right
+  this->btn_status[1] = !this->digitalRead(P1);  // Center
+  this->btn_status[2] = !this->digitalRead(P0);  // Left
+  Serial.printf("{<LEFT: %d>, <CENTER: %d>, <RIGHT: %d>}\n", this->btn_status[0], this->btn_status[1], this->btn_status[2]);  // Test
   return;
 }
 
 void Keyboard::inter_handler()
 {
-  this->btn_status[0] = !digitalRead(P0);
-  this->btn_status[1] = !digitalRead(P1);
-  this->btn_status[2] = !digitalRead(P2);
+  
   return;
 }

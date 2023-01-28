@@ -32,14 +32,17 @@ For informations about controll see "software" folder.
 #endif
 
 Screen screen = Screen(SDA, SCL);
+Keyboard kb = Keyboard(0b0100010, SDA, SCL, 10);
 
 void setup(){
   Serial.begin(9600);
 
   screen.begin();
+  kb.begin();
 }
 
 void loop(){
   screen.update();
+  kb.update();  
   delay(1000);
 }

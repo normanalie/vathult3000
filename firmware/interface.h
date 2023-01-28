@@ -23,10 +23,9 @@ class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
     uint8_t selected_id = 1;
 };
 
-class Keyboard: public PCF8574{]
+class Keyboard: public PCF8574{
   public:
-    Keyboard(uint8_t,uint8_t,uint8_t,uint8_t);
-    int begin();
+    Keyboard(uint8_t addr, uint8_t sda, uint8_t scl, uint8_t inter_pin);
     void update();
     bool btn_status[3] = {0};
   private:
