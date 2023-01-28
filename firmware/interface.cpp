@@ -17,20 +17,59 @@ void Screen::update()
       case OUTPUTS:
         this->draw_outputs();
         break;
+      case SENSORS:
+        break;
+      case SETTINGS:
+        break;
     }
   } while (this->nextPage());
   return;
 }
 
 void Screen::nav_left(){
-  this->selected_id = this->selected_id == 0 ? MENU_ITEM_LEN-1 : this->selected_id-1;
+  switch(this->current_screen){
+    case HOME:
+      this->selector_count = this->selector_count == 0 ? 255 : this->selector_count-1;
+      break;
+    case OUTPUTS:
+      break;
+    case SENSORS:
+      break;
+    case SETTINGS:
+      break;
+  }
   return;
 }
+
 void Screen::nav_center(){
+  switch(this->current_screen){
+    case HOME:
+      if(this->selector_count%3 == 0) this->current_screen = OUTPUTS;
+      if(this->selector_count%3 == 1) this->current_screen = SENSORS;
+      if(this->selector_count%3 == 2) this->current_screen = SETTINGS;
+      break;
+    case OUTPUTS:
+      break;
+    case SENSORS:
+      break;
+    case SETTINGS:
+      break;
+  }
   return;
 }
+
 void Screen::nav_right(){
-  this->selected_id = this->selected_id == MENU_ITEM_LEN-1 ? 0 : this->selected_id+1;
+  switch(this->current_screen){
+    case HOME:
+      this->selector_count = this->selector_count == 255 ? 0 : this->selector_count+1;
+      break;
+    case OUTPUTS:
+      break;
+    case SENSORS:
+      break;
+    case SETTINGS:
+      break;
+  }
   return;
 }
 
@@ -76,7 +115,7 @@ void Screen::draw_home()
   uint8_t *buf = new uint8_t[2 * size_valve];
   if(buf)
   {
-    switch (this->selected_id)
+    switch (this->selector_count%HOME_ITEM_LEN)
     {
     case 0:
       // Left item

@@ -55,6 +55,8 @@ void menu_navigate(){
       screen.nav_left();
     }else if(keyboard.isOnlyPressed(BTN_RIGHT)){
       screen.nav_right();
+    }else if(keyboard.isOnlyPressed(BTN_CENTER)){
+      screen.nav_center();
     }
     t = millis();
   }

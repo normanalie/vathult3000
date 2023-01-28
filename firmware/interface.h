@@ -1,7 +1,7 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
-#define MENU_ITEM_LEN 3 
+#define HOME_ITEM_LEN 3 
 #define BTN_LEFT 0
 #define BTN_CENTER 1
 #define BTN_RIGHT 2
@@ -29,10 +29,10 @@ class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
     void nav_right();
     bool wifi_connected = false;
     bool error = false;
-    uint8_t selected_id = 0;
   private:
     char time[6] = "12:12";  // TODO: Take a time object in constructor and update time in screen::update
     enum Screens current_screen = HOME;
+    uint8_t selector_count = 127;  // incremented each time right is pressed. Decremented each time left is pressed. By doing modulo you can select an item in a list.
     void draw_headbar();
     void draw_home();
     void draw_outputs();
