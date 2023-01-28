@@ -32,17 +32,31 @@ For informations about controll see "software" folder.
 #endif
 
 Screen screen = Screen(SDA, SCL);
-Keyboard kb = Keyboard(0b0100010, SDA, SCL, 10);
+Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
+
+void menu_navigate();
 
 void setup(){
   Serial.begin(9600);
-
   screen.begin();
-  kb.begin();
+  keyboard.begin();
 }
 
 void loop(){
   screen.update();
-  kb.update();  
-  delay(1000);
+  keyboard.update();
+  menu_navigate();
+}
+
+void menu_navigate(){
+  static unsigned long t = millis();
+  if(millis()-t > 150){
+    if(keyboard.isOnlyPressed(BTN_LEFT)){
+      screen.selected_id = screen.selected_id == 0 ? MENU_ITEM_LEN-1 : screen.selected_id-1;
+    }else if(keyboard.isOnlyPressed(BTN_RIGHT)){
+      screen.selected_id = screen.selected_id == MENU_ITEM_LEN-1 ? 0 : screen.selected_id+1;
+    }
+    t = millis();
+  }
+  return;
 }

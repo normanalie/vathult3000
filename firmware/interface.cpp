@@ -21,15 +21,20 @@ void Screen::draw_headbar()
 
   // WiFi
   uint8_t *buf = new uint8_t[2 * size_wifi];
-  if (buf)
+  if(buf)
   {
-    memcpy_P(buf, bmp_wifi, 2 * size_wifi);
-    this->drawXBM(0, 0, size_wifi, size_wifi, buf);
+    if(this->wifi_connected){
+      memcpy_P(buf, bmp_wifi, 2 * size_wifi);
+      this->drawXBM(0, 0, size_no_wifi, size_no_wifi, buf);
+    }else{
+      memcpy_P(buf, bmp_no_wifi, 2 * size_no_wifi);
+      this->drawXBM(0, 0, size_no_wifi, size_no_wifi, buf);
+    }
   }
 
   // Warns
-  this->drawStr(42, 11, "3");
-  if (buf)
+  //this->drawStr(42, 11, "3");  // Warns count
+  if(buf && this->error)
   {
     memcpy_P(buf, bmp_warn, 2 * size_warn);
     this->drawXBM(50, 0, size_warn, size_warn, buf);
@@ -122,8 +127,26 @@ void Keyboard::update()
   return;
 }
 
+bool Keyboard::isOnlyPressed(uint8_t btn){
+  /* Return true if the button is currently the only one to be pressed. */ 
+  switch(btn){
+    case BTN_LEFT:
+      if(this->btn_status[BTN_LEFT] && !this->btn_status[BTN_CENTER] && !this->btn_status[BTN_RIGHT]) return true;
+      break;
+    case BTN_CENTER:
+      if(!this->btn_status[BTN_LEFT] && this->btn_status[BTN_CENTER] && !this->btn_status[BTN_RIGHT]) return true;
+      break;
+    case BTN_RIGHT:
+      if(!this->btn_status[BTN_LEFT] && !this->btn_status[BTN_CENTER] && this->btn_status[BTN_RIGHT]) return true;
+      break;
+  }
+  return false;
+}
+
 void Keyboard::inter_handler()
 {
   
   return;
 }
+
+
