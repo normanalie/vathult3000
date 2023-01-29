@@ -188,7 +188,26 @@ void Screen::draw_home()
 
 void Screen::draw_outputs(){
   static int8_t source = -1;
+  static uint8_t frame_y = 32;
 
+  /* Logic */
+  enum Buttons pressed = EMPTY;
+  pressed = this->pressed();
+  if(source == -1){
+    if(pressed == LEFT) frame_y = frame_y==17 ? 17 : frame_y-15;
+    if(pressed == RIGHT) frame_y = frame_y==47 ? 47 : frame_y+15;
+    if(pressed == CENTER){
+      if(frame_y==17){
+        this->current_screen = HOME;
+        frame_y = 32;
+        return;
+      }
+      if(frame_y==32) source = 0;
+      if(frame_y==47) source = 1;            
+    }
+  }
+
+  /* Display */
   this->setFont(u8g2_font_squeezed_b7_tr); // for sanity
   uint8_t *buf = new uint8_t[2 * size_valve];
   if(buf)
@@ -199,13 +218,12 @@ void Screen::draw_outputs(){
       memcpy(buf, bmp_back, 2*size_back);
       this->drawXBM(0, 20, size_back, size_back, buf);
       this->drawStr(13, 28, "Back");
-
-      // Tap water (default selection)
+      // Tap water
       this->drawStr(13, 43, "Tap water");
-      this->drawFrame(0, 32, 128, 16);
-
       // Rain water
-      this->drawStr(13, 60, "Rain water");
+      this->drawStr(13, 58, "Rain water");
+      // Frame
+      this->drawFrame(0, frame_y, 128, 16);
     }
   }
   delete[] buf;
