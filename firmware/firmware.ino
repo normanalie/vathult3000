@@ -31,6 +31,9 @@ For informations about controll see "software" folder.
   #define SCL 1
 #endif
 
+bool outputs_state[4] = {0};
+uint8_t input_source = -1;
+
 Screen screen = Screen(SDA, SCL);
 Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
 

@@ -1,7 +1,6 @@
 #include "interface.h"
 
 Screen::Screen(int sda, int scl) : U8G2_SSD1306_128X64_NONAME_1_HW_I2C(U8G2_R0, -1, scl, sda){
-
 }
 
 void Screen::update()
@@ -187,13 +186,13 @@ void Screen::draw_home()
 
 
 void Screen::draw_outputs(){
-  static int8_t source = -1;
   static uint8_t frame_y = 32;
+  static uint8_t displayed_out = 1;
 
   /* Logic */
   enum Buttons pressed = EMPTY;
   pressed = this->pressed();
-  if(source == -1){
+  if(this->input_source == -1){
     if(pressed == LEFT) frame_y = frame_y==17 ? 17 : frame_y-15;
     if(pressed == RIGHT) frame_y = frame_y==47 ? 47 : frame_y+15;
     if(pressed == CENTER){
@@ -202,18 +201,45 @@ void Screen::draw_outputs(){
         frame_y = 32;
         return;
       }
-      if(frame_y==32) source = 0;
-      if(frame_y==47) source = 1;            
+      if(frame_y==32) this->input_source = 0;
+      if(frame_y==47) this->input_source = 1;
+      frame_y = 32;            
+    }
+  }else{
+    if(pressed == LEFT){
+      if(frame_y == 32 && displayed_out>1){
+        displayed_out -= 1;
+      }else{
+        frame_y = frame_y==17 ? 17 : frame_y-15;
+      }
+    } 
+    if(pressed == RIGHT){
+      if(frame_y == 47 && displayed_out<4){
+        displayed_out += 1;
+      }else{
+        frame_y = frame_y==47 ? 47 : frame_y+15;
+      }
+    }
+    if(pressed == CENTER){
+      if(frame_y==17){  // Back
+        this->input_source = -1;     
+        return;
+      }else if(frame_y==32){
+        this->outputs_state[displayed_out-1] = this->outputs_state[displayed_out-1]==1 ? 0 : 1;  
+      }else{
+        this->outputs_state[displayed_out] = this->outputs_state[displayed_out]==1 ? 0 : 1; 
+      }
     }
   }
 
   /* Display */
+  char name_out[6] = {'O', 'u', 't', ' ', '0'+displayed_out, '\0'};
   this->setFont(u8g2_font_squeezed_b7_tr); // for sanity
   uint8_t *buf = new uint8_t[2 * size_valve];
   if(buf)
   {
-    if(source == -1){  // water source not set 
-      /* Select water source */
+    if(this->input_source == -1){  // water *this->input_source not set 
+      /* Select water *this->input_source */
       // Back
       memcpy(buf, bmp_back, 2*size_back);
       this->drawXBM(0, 20, size_back, size_back, buf);
@@ -222,6 +248,33 @@ void Screen::draw_outputs(){
       this->drawStr(13, 43, "Tap water");
       // Rain water
       this->drawStr(13, 58, "Rain water");
+      // Frame
+      this->drawFrame(0, frame_y, 128, 16);
+    }else{
+      /* List outputs */
+      // Back
+      memcpy(buf, bmp_back, 2*size_back);
+      this->drawXBM(0, 20, size_back, size_back, buf);
+      this->drawStr(13, 28, "Back");
+      // Output top
+      if(this->outputs_state[displayed_out-1]){
+        memcpy(buf, bmp_int_on, 2*size_int_on);
+      }else{
+        memcpy(buf, bmp_int_off, 2*size_int_off);
+      }
+      this->drawXBM(0, 35, size_int_off, size_int_off, buf);
+      this->drawStr(13, 43, name_out);
+      // Output bottom
+      if(displayed_out != 4){  // Another output to display at the bottom
+        name_out[4] = '0'+(displayed_out+1);
+        if(this->outputs_state[displayed_out+1-1]){
+          memcpy(buf, bmp_int_on, 2*size_int_on);
+        }else{
+          memcpy(buf, bmp_int_off, 2*size_int_off);
+        }
+        this->drawXBM(0, 50, size_int_off, size_int_off, buf);
+        this->drawStr(13, 58, name_out);
+      }
       // Frame
       this->drawFrame(0, frame_y, 128, 16);
     }

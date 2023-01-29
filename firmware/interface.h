@@ -38,6 +38,8 @@ class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
     bool error = false;
   private:
     char time[6] = "12:12";  // TODO: Take a time object in constructor and update time in screen::update
+    bool outputs_state[4] = {0};
+    int8_t input_source = -1;        
     enum Screens current_screen = HOME;
     enum Buttons press_buffer[BTN_BUF_LEN] = {EMPTY};
     void draw_headbar();
