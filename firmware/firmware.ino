@@ -32,7 +32,7 @@ For informations about controll see "software" folder.
   #define SCL 1
 #endif
 
-int16_t states[16] = {0};
+
 
 Screen screen = Screen(SDA, SCL, states);
 Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);

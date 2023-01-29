@@ -36,7 +36,6 @@ class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
     void nav_left();
     void nav_center();
     void nav_right();
-    bool wifi_connected = false;
     String error = "";
   private:
     char time[6] = "12:12";  // TODO: Take a time object in constructor and update time in screen::update       

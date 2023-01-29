@@ -11,5 +11,8 @@
 #define STATE_PUMP      5
 #define STATE_FLOW_TAP  6
 #define STATE_FLOW_RAIN 7
+#define STATE_WIFI      8 
+
+extern int16_t states[16];
 
 #endif

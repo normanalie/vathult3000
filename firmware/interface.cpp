@@ -84,7 +84,7 @@ void Screen::draw_headbar()
   uint8_t *buf = new uint8_t[2 * size_wifi];
   if(buf)
   {
-    if(this->wifi_connected){
+    if(this->flags[STATE_WIFI]){
       memcpy_P(buf, bmp_wifi, 2 * size_wifi);
       this->drawXBM(0, 0, size_no_wifi, size_no_wifi, buf);
     }else{
