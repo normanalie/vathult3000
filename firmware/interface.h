@@ -1,7 +1,7 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
-#define HOME_ITEM_LEN 3 
+#define BTN_BUF_LEN 3
 #define BTN_LEFT 0
 #define BTN_CENTER 1
 #define BTN_RIGHT 2
@@ -20,6 +20,13 @@ enum Screens{
   SETTINGS
 };
 
+enum Buttons{
+  EMPTY,
+  LEFT,
+  CENTER,
+  RIGHT
+};
+
 class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
   public:
     Screen(int sda, int scl);
@@ -32,10 +39,11 @@ class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
   private:
     char time[6] = "12:12";  // TODO: Take a time object in constructor and update time in screen::update
     enum Screens current_screen = HOME;
-    uint8_t selector_count = 127;  // incremented each time right is pressed. Decremented each time left is pressed. By doing modulo you can select an item in a list.
+    enum Buttons press_buffer[BTN_BUF_LEN] = {EMPTY};
     void draw_headbar();
     void draw_home();
     void draw_outputs();
+    enum Buttons pressed();
 };
 
 class Keyboard: public PCF8574{

@@ -27,48 +27,49 @@ void Screen::update()
 }
 
 void Screen::nav_left(){
-  switch(this->current_screen){
-    case HOME:
-      this->selector_count = this->selector_count == 0 ? 255 : this->selector_count-1;
-      break;
-    case OUTPUTS:
-      break;
-    case SENSORS:
-      break;
-    case SETTINGS:
-      break;
+  uint8_t i = 0;
+  while(i < BTN_BUF_LEN){
+    if(i == BTN_BUF_LEN-1){
+      for(int c=0; c<BTN_BUF_LEN; c++){
+        this->press_buffer[c] = EMPTY;
+      }
+      this->press_buffer[0] = LEFT;
+    }else if(this->press_buffer[i] == EMPTY){
+      this->press_buffer[i] = LEFT;
+      i = BTN_BUF_LEN;
+    }
   }
   return;
 }
 
 void Screen::nav_center(){
-  switch(this->current_screen){
-    case HOME:
-      if(this->selector_count%3 == 0) this->current_screen = OUTPUTS;
-      if(this->selector_count%3 == 1) this->current_screen = SENSORS;
-      if(this->selector_count%3 == 2) this->current_screen = SETTINGS;
-      break;
-    case OUTPUTS:
-      break;
-    case SENSORS:
-      break;
-    case SETTINGS:
-      break;
+  uint8_t i = 0;
+  while(i < BTN_BUF_LEN){
+    if(i == BTN_BUF_LEN-1){
+      for(int c=0; c<BTN_BUF_LEN; c++){
+        this->press_buffer[c] = EMPTY;
+      }
+      this->press_buffer[0] = CENTER;
+    }else if(this->press_buffer[i] == EMPTY){
+      this->press_buffer[i] = CENTER;
+      i = BTN_BUF_LEN;
+    }
   }
   return;
 }
 
 void Screen::nav_right(){
-  switch(this->current_screen){
-    case HOME:
-      this->selector_count = this->selector_count == 255 ? 0 : this->selector_count+1;
-      break;
-    case OUTPUTS:
-      break;
-    case SENSORS:
-      break;
-    case SETTINGS:
-      break;
+  uint8_t i = 0;
+  while(i < BTN_BUF_LEN){
+    if(i == BTN_BUF_LEN-1){
+      for(int c=0; c<BTN_BUF_LEN; c++){
+        this->press_buffer[c] = EMPTY;
+      }
+      this->press_buffer[0] = RIGHT;
+    }else if(this->press_buffer[i] == EMPTY){
+      this->press_buffer[i] = RIGHT;
+      i = BTN_BUF_LEN;
+    }
   }
   return;
 }
@@ -110,12 +111,27 @@ void Screen::draw_headbar()
 
 void Screen::draw_home()
 {
+  static uint8_t selected = 0;
+  enum Buttons pressed = EMPTY;
+  
   this->setFont(u8g2_font_squeezed_b7_tr); // for sanity
+
+  pressed = this->pressed();
+  if(pressed == LEFT){
+    selected = selected==0 ? 2 : selected-1;
+  }else if(pressed == CENTER){
+    if(selected == 0) this->current_screen = OUTPUTS;
+    if(selected == 1) this->current_screen = SENSORS;
+    if(selected == 2) this->current_screen = SETTINGS;
+    return;
+  }else if(pressed == RIGHT){
+    selected = selected==2 ? 0 : selected+1; 
+  }
 
   uint8_t *buf = new uint8_t[2 * size_valve];
   if(buf)
   {
-    switch (this->selector_count%HOME_ITEM_LEN)
+    switch (selected)
     {
     case 0:
       // Left item
@@ -196,6 +212,16 @@ void Screen::draw_outputs(){
   return;
 }
 
+enum Buttons Screen::pressed(){
+  enum Buttons pressed = this->press_buffer[0];  // Store the oldest pressed button
+
+  for(int c=1; c<BTN_BUF_LEN-1; c++){  // Slide the buffer
+    this->press_buffer[c-1] = this->press_buffer[c];
+  }
+  this->press_buffer[BTN_BUF_LEN-1] = EMPTY;
+
+  return pressed;
+}
 
 
 Keyboard::Keyboard(uint8_t addr, uint8_t sda, uint8_t scl, uint8_t inter_pin) : PCF8574(addr, sda, scl)
