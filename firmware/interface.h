@@ -2,6 +2,7 @@
 #define INTERFACE_H
 
 #define BTN_BUF_LEN 3
+#define ERR_BUF_LEN 8
 #define BTN_LEFT 0
 #define BTN_CENTER 1
 #define BTN_RIGHT 2
@@ -34,17 +35,18 @@ class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
     void nav_left();
     void nav_center();
     void nav_right();
-    bool wifi_connected = false;
-    bool error = false;
-  private:
-    char time[6] = "12:12";  // TODO: Take a time object in constructor and update time in screen::update
     bool outputs_state[4] = {0};
-    int8_t input_source = -1;        
+    int8_t input_source = -1; 
+    bool wifi_connected = false;
+    String error = "";
+  private:
+    char time[6] = "12:12";  // TODO: Take a time object in constructor and update time in screen::update       
     enum Screens current_screen = HOME;
     enum Buttons press_buffer[BTN_BUF_LEN] = {EMPTY};
     void draw_headbar();
     void draw_home();
     void draw_outputs();
+    void draw_settings();
     enum Buttons pressed();
 };
 

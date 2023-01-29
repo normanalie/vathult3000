@@ -43,6 +43,7 @@ void setup(){
   Serial.begin(9600);
   screen.begin();
   keyboard.begin();
+  screen.error = "test err";
 }
 
 void loop(){

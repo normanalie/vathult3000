@@ -19,6 +19,7 @@ void Screen::update()
       case SENSORS:
         break;
       case SETTINGS:
+        this->draw_settings();
         break;
     }
   } while (this->nextPage());
@@ -90,19 +91,20 @@ void Screen::draw_headbar()
     }
   }
 
-  // Warns
-  //this->drawStr(42, 11, "3");  // Warns count
-  if(buf && this->error)
-  {
-    memcpy_P(buf, bmp_warn, 2 * size_warn);
-    this->drawXBM(50, 0, size_warn, size_warn, buf);
-  }
-
   // Time
   this->drawStr(94, 11, this->time);
 
   // Bottom line
   this->drawLine(0, 12, 128, 12);
+
+  // Warns
+  this->setFont(u8g2_font_squeezed_b7_tr);
+  this->drawStr(60, 11, "err"); 
+  if(buf && this->error != "")
+  {
+    memcpy_P(buf, bmp_warn, 2 * size_warn);
+    this->drawXBM(50, 0, size_warn, size_warn, buf);
+  }
 
   delete[] buf;
   return;
@@ -275,6 +277,49 @@ void Screen::draw_outputs(){
         this->drawXBM(0, 50, size_int_off, size_int_off, buf);
         this->drawStr(13, 58, name_out);
       }
+      // Frame
+      this->drawFrame(0, frame_y, 128, 16);
+    }
+  }
+  delete[] buf;
+  return;
+}
+
+void Screen::draw_settings(){
+  static uint8_t frame_y = 32;  
+  /* Logic */
+  enum Buttons pressed = this->pressed();
+  if(pressed == LEFT) frame_y = frame_y==17 ? 17 : frame_y-15;
+  if(pressed == RIGHT) frame_y = frame_y==47 ? 47 : frame_y+15;
+  if(pressed == CENTER){
+    if(frame_y==17){
+      this->current_screen = HOME;
+      frame_y = 32;
+      return;
+    }
+    frame_y = 32;            
+  }
+
+  /* Display */
+  uint8_t *buf = new uint8_t[2 * size_valve];
+  if(buf)
+  {
+    if(this->input_source == -1){  // water *this->input_source not set 
+      /* Select water *this->input_source */
+      // Back
+      memcpy(buf, bmp_back, 2*size_back);
+      this->drawXBM(0, 20, size_back, size_back, buf);
+      this->drawStr(13, 28, "Back");
+      // Errors
+      memcpy(buf, bmp_warn, 2*size_warn);
+      this->drawXBM(0, 35, size_warn, size_warn, buf);
+      if(this->error == ""){
+        this->drawStr(13, 43, "No errors");
+      }else{
+        this->drawStr(13, 43, this->error.c_str());
+      }
+      // WiFi
+      this->drawStr(13, 58, "WiFi config");
       // Frame
       this->drawFrame(0, frame_y, 128, 16);
     }
