@@ -12,6 +12,7 @@
 #include <U8g2lib.h>  // OLED Screen
 #include <string.h>
 
+#include "flags.h"
 #include "bitmaps.h"
 
 enum Screens{
@@ -30,23 +31,23 @@ enum Buttons{
 
 class Screen: public U8G2_SSD1306_128X64_NONAME_1_HW_I2C{
   public:
-    Screen(int sda, int scl);
+    Screen(int sda, int scl, int16_t *flags);
     void update();
     void nav_left();
     void nav_center();
     void nav_right();
-    bool outputs_state[4] = {0};
-    int8_t input_source = -1; 
     bool wifi_connected = false;
     String error = "";
   private:
     char time[6] = "12:12";  // TODO: Take a time object in constructor and update time in screen::update       
     enum Screens current_screen = HOME;
     enum Buttons press_buffer[BTN_BUF_LEN] = {EMPTY};
+    int16_t *flags;
     void draw_headbar();
     void draw_home();
     void draw_outputs();
     void draw_settings();
+    void draw_sensors();
     enum Buttons pressed();
 };
 

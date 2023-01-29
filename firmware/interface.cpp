@@ -1,6 +1,7 @@
 #include "interface.h"
 
-Screen::Screen(int sda, int scl) : U8G2_SSD1306_128X64_NONAME_1_HW_I2C(U8G2_R0, -1, scl, sda){
+Screen::Screen(int sda, int scl, int16_t *flags) : U8G2_SSD1306_128X64_NONAME_1_HW_I2C(U8G2_R0, -1, scl, sda){
+ this->flags = flags;   
 }
 
 void Screen::update()
@@ -17,6 +18,7 @@ void Screen::update()
         this->draw_outputs();
         break;
       case SENSORS:
+        this->draw_sensors();
         break;
       case SETTINGS:
         this->draw_settings();
@@ -189,12 +191,13 @@ void Screen::draw_home()
 
 void Screen::draw_outputs(){
   static uint8_t frame_y = 32;
-  static uint8_t displayed_out = 1;
+  static uint8_t displayed_out = STATE_OUTPUT1;
+  static int8_t source = -1;
 
   /* Logic */
   enum Buttons pressed = EMPTY;
   pressed = this->pressed();
-  if(this->input_source == -1){
+  if(source == -1){
     if(pressed == LEFT) frame_y = frame_y==17 ? 17 : frame_y-15;
     if(pressed == RIGHT) frame_y = frame_y==47 ? 47 : frame_y+15;
     if(pressed == CENTER){
@@ -203,8 +206,14 @@ void Screen::draw_outputs(){
         frame_y = 32;
         return;
       }
-      if(frame_y==32) this->input_source = 0;
-      if(frame_y==47) this->input_source = 1;
+      if(frame_y==32){
+        source = 0;
+        this->flags[STATE_SOURCE] = 0;
+      }
+      if(frame_y==47){
+        source = 1;
+        this->flags[STATE_SOURCE] = 1;
+      }
       frame_y = 32;            
     }
   }else{
@@ -224,12 +233,12 @@ void Screen::draw_outputs(){
     }
     if(pressed == CENTER){
       if(frame_y==17){  // Back
-        this->input_source = -1;     
+        source = -1;   
         return;
       }else if(frame_y==32){
-        this->outputs_state[displayed_out-1] = this->outputs_state[displayed_out-1]==1 ? 0 : 1;  
-      }else{
-        this->outputs_state[displayed_out] = this->outputs_state[displayed_out]==1 ? 0 : 1; 
+        this->flags[displayed_out] = this->flags[displayed_out]==1 ? 0 : 1;
+      }else if(displayed_out<=STATE_OUTPUT4){
+        this->flags[displayed_out+1] = this->flags[displayed_out+1]==1 ? 0 : 1; 
       }
     }
   }
@@ -240,7 +249,7 @@ void Screen::draw_outputs(){
   uint8_t *buf = new uint8_t[2 * size_valve];
   if(buf)
   {
-    if(this->input_source == -1){  // water *this->input_source not set 
+    if(source == -1){  // water *this->input_source not set 
       /* Select water *this->input_source */
       // Back
       memcpy(buf, bmp_back, 2*size_back);
@@ -259,7 +268,7 @@ void Screen::draw_outputs(){
       this->drawXBM(0, 20, size_back, size_back, buf);
       this->drawStr(13, 28, "Back");
       // Output top
-      if(this->outputs_state[displayed_out-1]){
+      if(this->flags[displayed_out]){
         memcpy(buf, bmp_int_on, 2*size_int_on);
       }else{
         memcpy(buf, bmp_int_off, 2*size_int_off);
@@ -267,9 +276,9 @@ void Screen::draw_outputs(){
       this->drawXBM(0, 35, size_int_off, size_int_off, buf);
       this->drawStr(13, 43, name_out);
       // Output bottom
-      if(displayed_out != 4){  // Another output to display at the bottom
+      if(displayed_out != STATE_OUTPUT4){  // Another output to display at the bottom
         name_out[4] = '0'+(displayed_out+1);
-        if(this->outputs_state[displayed_out+1-1]){
+        if(this->flags[displayed_out+1]){
           memcpy(buf, bmp_int_on, 2*size_int_on);
         }else{
           memcpy(buf, bmp_int_off, 2*size_int_off);
@@ -304,8 +313,46 @@ void Screen::draw_settings(){
   uint8_t *buf = new uint8_t[2 * size_valve];
   if(buf)
   {
-    if(this->input_source == -1){  // water *this->input_source not set 
-      /* Select water *this->input_source */
+    // Back
+    memcpy(buf, bmp_back, 2*size_back);
+    this->drawXBM(0, 20, size_back, size_back, buf);
+    this->drawStr(13, 28, "Back");
+    // Errors
+    memcpy(buf, bmp_warn, 2*size_warn);
+    this->drawXBM(0, 35, size_warn, size_warn, buf);
+    if(this->error == ""){
+      this->drawStr(13, 43, "No errors");
+    }else{
+      this->drawStr(13, 43, this->error.c_str());
+    }
+    // WiFi
+    this->drawStr(13, 58, "WiFi config");
+    // Frame
+    this->drawFrame(0, frame_y, 128, 16);
+  }
+  delete[] buf;
+  return;
+}
+
+void Screen::draw_sensors(){
+    static uint8_t frame_y = 32;  
+  /* Logic */
+  enum Buttons pressed = this->pressed();
+  if(pressed == LEFT) frame_y = frame_y==17 ? 17 : frame_y-15;
+  if(pressed == RIGHT) frame_y = frame_y==47 ? 47 : frame_y+15;
+  if(pressed == CENTER){
+    if(frame_y==17){
+      this->current_screen = HOME;
+      frame_y = 32;
+      return;
+    }
+    frame_y = 32;            
+  }
+
+  /* Display */
+  uint8_t *buf = new uint8_t[2 * size_valve];
+  if(buf)
+  {
       // Back
       memcpy(buf, bmp_back, 2*size_back);
       this->drawXBM(0, 20, size_back, size_back, buf);
@@ -322,7 +369,6 @@ void Screen::draw_settings(){
       this->drawStr(13, 58, "WiFi config");
       // Frame
       this->drawFrame(0, frame_y, 128, 16);
-    }
   }
   delete[] buf;
   return;

@@ -16,6 +16,7 @@ For informations about controll see "software" folder.
 //#define ESP32  // Production version
 #define ESP8266  // Prototype version
 
+#include "flags.h"
 #include "interface.h"
 
 #ifdef ARDUINO
@@ -31,10 +32,9 @@ For informations about controll see "software" folder.
   #define SCL 1
 #endif
 
-bool outputs_state[4] = {0};
-uint8_t input_source = -1;
+int16_t states[16] = {0};
 
-Screen screen = Screen(SDA, SCL);
+Screen screen = Screen(SDA, SCL, states);
 Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
 
 void menu_navigate();
