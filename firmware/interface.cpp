@@ -296,6 +296,7 @@ void Screen::draw_outputs(){
 
 void Screen::draw_settings(){
   static uint8_t frame_y = 32;  
+  static uint8_t submenu = 0;  // 0: all, 1: wifi
   /* Logic */
   enum Buttons pressed = this->pressed();
   if(pressed == LEFT) frame_y = frame_y==17 ? 17 : frame_y-15;
@@ -306,6 +307,7 @@ void Screen::draw_settings(){
       frame_y = 32;
       return;
     }
+    if(frame_y==47) submenu = 1;
     frame_y = 32;            
   }
 
@@ -326,6 +328,13 @@ void Screen::draw_settings(){
       this->drawStr(13, 43, this->error.c_str());
     }
     // WiFi
+    if(this->flags[STATE_WIFI]){
+      memcpy(buf, bmp_wifi, 2*size_wifi);
+      this->drawXBM(0, 50, size_wifi, size_wifi, buf);
+    }else{
+      memcpy(buf, bmp_wifi, 2*size_no_wifi);
+      this->drawXBM(0, 50, size_no_wifi, size_no_wifi, buf);
+    }
     this->drawStr(13, 58, "WiFi config");
     // Frame
     this->drawFrame(0, frame_y, 128, 16);
