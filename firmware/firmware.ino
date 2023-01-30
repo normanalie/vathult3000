@@ -18,7 +18,7 @@ For informations about controll see "software" folder.
 
 #include "flags.h"
 #include "interface.h"
-#include "actuators.g"
+#include "actuators.h"
 
 #ifdef ARDUINO
   #define SDA A4
@@ -37,6 +37,7 @@ For informations about controll see "software" folder.
 
 Screen screen = Screen(SDA, SCL, states);
 Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
+Actuators actuators = Actuators(0b0100000, SDA, SCL);
 
 void menu_navigate();
 
@@ -44,10 +45,19 @@ void setup(){
   Serial.begin(9600);
   screen.begin();
   keyboard.begin();
-  screen.error = "test err";
+  if(!actuators.begin()) screen.error = "Output not found";
 }
 
 void loop(){
+  static unsigned long t = millis();
+  if(millis()-t > 100){
+    if(states[STATE_SOURCE] == SOURCE_TAP){
+      states[STATE_PUMP] = HIGH;
+    } else {
+      states[STATE_PUMP] = LOW;
+    }
+    actuators.write_states(states);
+  }
   screen.update();
   keyboard.update();
   menu_navigate();

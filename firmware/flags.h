@@ -3,6 +3,9 @@
 
 #include "Arduino.h"
 
+#define SOURCE_TAP  0
+#define SOURCE_RAIN 1
+
 #define STATE_SOURCE    0
 #define STATE_OUTPUT1   1
 #define STATE_OUTPUT2   2 
