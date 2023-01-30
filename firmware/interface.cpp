@@ -100,10 +100,10 @@ void Screen::draw_headbar()
   this->drawLine(0, 12, 128, 12);
 
   // Warns
-  this->setFont(u8g2_font_squeezed_b7_tr);
-  this->drawStr(60, 11, "err"); 
   if(buf && this->error != "")
   {
+    this->setFont(u8g2_font_squeezed_b7_tr);
+    this->drawStr(60, 11, "err"); 
     memcpy_P(buf, bmp_warn, 2 * size_warn);
     this->drawXBM(50, 0, size_warn, size_warn, buf);
   }
