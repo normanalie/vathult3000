@@ -19,6 +19,7 @@ For informations about controll see "software" folder.
 #include "flags.h"
 #include "interface.h"
 #include "actuators.h"
+#include "flows.h"
 
 #ifdef ARDUINO
   #define SDA A4
