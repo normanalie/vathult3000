@@ -297,6 +297,9 @@ void Screen::draw_outputs(){
 void Screen::draw_settings(){
   static uint8_t frame_y = 32;  
   static uint8_t submenu = 0;  // 0: all, 1: wifi
+
+  this->setFont(u8g2_font_squeezed_b7_tr); // for sanity
+
   /* Logic */
   enum Buttons pressed = this->pressed();
   if(pressed == LEFT) frame_y = frame_y==17 ? 17 : frame_y-15;

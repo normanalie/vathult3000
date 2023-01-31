@@ -16,6 +16,7 @@ For informations about controll see "software" folder.
 //#define ESP32  // Production version
 #define ESP8266  // Prototype version
 
+#include <WiFiManager.h>
 #include "flags.h"
 #include "interface.h"
 #include "actuators.h"
@@ -34,22 +35,27 @@ For informations about controll see "software" folder.
   #define SCL 1
 #endif
 
-
+// WiFi
+WiFiManager wm;
 
 Screen screen = Screen(SDA, SCL, states);
 Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
 Actuators actuators = Actuators(0b0100000, SDA, SCL);
 
+void index_html();
 void menu_navigate();
 
 void setup(){
+  WiFi.mode(WIFI_STA);
   Serial.begin(9600);
   screen.begin();
   keyboard.begin();
   if(!actuators.begin()) screen.error = "Output not found";
+  //wm.autoConnect("V3KSetup");
 }
 
 void loop(){
+
   static unsigned long t = millis();
   if(millis()-t > 100){
     if(states[STATE_SOURCE] == SOURCE_TAP){
@@ -76,5 +82,10 @@ void menu_navigate(){
     }
     t = millis();
   }
+  return;
+}
+
+
+void index_html(){
   return;
 }
