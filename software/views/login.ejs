@@ -1,22 +1,40 @@
-<h1>Login</h1>
+<!DOCTYPE html>
+<html lang="fr">
 
-<% if (messages.error) { %>
-    <%= messages.error %>  
-<% } %>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">  
 
-<form action="/login" method="POST">
+        <title>Login</title>
 
-    <div>
-        <label for="email">E-mail</label>
-        <input type="email" id="email" name="email" required>
-    </div>
+    </head>
 
-    <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
-    </div>
 
-    <button type="submit">Login</button>
-</form>
+    <body>
 
-<a href="/register">Register</a>
+        <h1>Login</h1>
+
+        <% if (messages.error) { %>
+            <%= messages.error %>  
+        <% } %>
+
+        <form action="/login" method="POST">
+
+            <div>
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit">Log in</button>
+        </form>
+
+        <a href="/register">Register</a>
+        
+    </body>
+</html>

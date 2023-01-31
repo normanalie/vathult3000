@@ -35,8 +35,8 @@ app.use(methodOverride('_method'));
 
 
 
-app.get('/', checkAuthenticated, (req, res) => {
-    res.render('index.ejs', {name: req.user.name} );
+app.get('/', (req, res) => {      //
+    res.render('homepage.ejs');
 })
 
 
@@ -45,7 +45,7 @@ app.get('/login', checkNotAuthenticated, (req, res) => {
 })
 
 app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-    successRedirect: '/',
+    successRedirect: '/dashboard',
     failureRedirect: '/login',
     failureFlash: true
 
@@ -80,6 +80,30 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
     }
 })
 
+app.post('/validate/<user_id>/<uid>', (req, res) => {      // EMPTY [A programmer]
+
+})
+
+app.get('/dashboard', checkAuthenticated, (req, res) => {
+    res.render('dashboard.ejs', {name: req.user.name} );
+})
+
+
+app.get('/devices', checkAuthenticated, (req, res) => {
+    res.render('devices.ejs');
+})
+
+app.get('/device/1', checkAuthenticated, (req, res) => {   // Remplacer le "1" par une variable qui s'adapte en en fonction de l'ID de l'appareil 
+    res.render('device-info.ejs');
+})
+
+app.post('/device/<device_id>/setoutput/<output_id>/<state>', checkAuthenticated, (req, res) => {  // EMPTY [A programmer par rapport à l'ESP]
+
+})
+
+app.post('/device/<device_id>/setsource/<source>', checkAuthenticated, (req, res) => {             // EMPTY [A programmer par rapport à l'ESP]
+
+})
 
 
 
@@ -99,4 +123,4 @@ function checkNotAuthenticated(req, res, next) {
     next();
 }
 
-app.listen(3000);
+app.listen(3000);  // Voir le site sur "localhost:3000"
