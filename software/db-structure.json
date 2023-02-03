@@ -1,0 +1,32 @@
+{
+    "defaultDB" : {
+
+        "dbName":  "vathult3000",
+
+        "Users": {
+            "tableName" : "Users",
+            "id" : "id",
+            "mail" : "mail",
+            "name" : "name",
+            "passwordHash" : "password_hash",
+            "active" : "active",
+            "activateUID" : "activate_uid"
+        },
+
+        "Vathults": {
+            "tableName" : "Vathults",
+            "id" : "id",
+            "userID" : "user_id",
+            "name" : "name",
+            "lastSeen" : "last_seen",
+            "errors" : "errors",
+            "pump" : "pump",
+            "input1" : "input1",
+            "input2" : "input2",
+            "output1" : "output1",
+            "output2" : "output2",
+            "output3" : "output3",
+            "output4" : "output4"
+        }
+    }
+}

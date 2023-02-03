@@ -1,0 +1,15 @@
+{
+    "devUser" : {
+        "host": "localhost",
+        "user": "root",
+        "password" : "",
+        "defaultDB" : "vathult3000"
+    },
+
+    "defaultUser" :{
+        "host": "???",
+        "user": "???",
+        "password" : "???",
+        "defaultDB" : "???"
+    }
+}
