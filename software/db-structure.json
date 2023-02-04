@@ -4,7 +4,7 @@
         "dbName":  "vathult3000",
 
         "Users": {
-            "tableName" : "Users",
+            "tableName" : "users",
             "id" : "id",
             "mail" : "mail",
             "name" : "name",
@@ -14,8 +14,9 @@
         },
 
         "Vathults": {
-            "tableName" : "Vathults",
+            "tableName" : "vathults",
             "id" : "id",
+            "serialNumber" : "serial_number",
             "userID" : "user_id",
             "name" : "name",
             "lastSeen" : "last_seen",

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+
+        <title>Change Email</title>
+
+    </head>
+
+
+    <body>
+
+        <h1>Change your email</h1>
+
+        <form action="/save-new-email" method="POST">
+            <div>
+                <p>Acual email : <%= email %></p>
+                <label for="email">New Email</label>
+                <input type="email" id="new-email" name="new-email" required>
+            </div>
+
+            <button type="submit">Save changes</button>
+        </form>
+
+        <form action="/user-profile" method="GET">
+            <button type="submit">Cancel</button>
+        </form>
+
+    </body>
+</html>

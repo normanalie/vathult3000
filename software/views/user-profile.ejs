@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+
+        <title>My Profile</title>
+
+    </head>
+
+    <body>
+
+        <h1>Your profile info :</h1>
+
+        <p>Name : <%= name %> </p>
+
+        <form action="/change-name" method="GET">
+            <button type="submit">Modify name</button>
+        </form>
+
+        <p>Email : <%= email %> </p>
+
+        <form action="/change-email" method="GET">
+            <button type="submit">Modify Mail</button>
+        </form>
+
+        <p>Password : </p>
+
+        <form action="/change-password" method="GET">
+            <button type="submit">Modify Password</button>
+        </form>
+
+        <p>Number of possessed Vathys : <%= userVathys %> </p>
+
+        <form action="/dashboard" method="GET">
+            <button type="submit">Return to Dashboard</button>
+        </form>
+
+    </body>
+</html>
