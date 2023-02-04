@@ -8,6 +8,11 @@ Firmware V0.1
  - Contact: Norman ALIE <mail@normanalie.fr>
  - License: CC BY-SA
 
+Requirements:
+ - ESP with WiFi capabilities
+ - CPU Frequency: 160MHz
+ - Erase Flash: USe "All flash content" the first time or to reset wifi creditentials memory
+
 For informations about wiring see the "hardware" folder.
 For informations about controll see "software" folder.
 */
@@ -46,23 +51,38 @@ void index_html();
 void menu_navigate();
 
 void setup(){
-  WiFi.mode(WIFI_STA);
   Serial.begin(9600);
+  // I/O
   screen.begin();
   keyboard.begin();
   if(!actuators.begin()) screen.error = "Output not found";
-  //wm.autoConnect("V3KSetup");
+  // WiFi
+  WiFi.mode(WIFI_STA);  // For sanity
+  wm.setConfigPortalBlocking(false); 
+  wm.setAPStaticIPConfig(IPAddress(192,168,1,1), IPAddress(192,168,1,1), IPAddress(255,255,255,0));  // Capttive portal IP
+  wm.setTitle("VATHULT3000");
+  wm.setClass("invert");  // Captive-portal dark theme
+  states[STATE_WIFI] = wm.autoConnect("VATHULT3000_Setup");
 }
 
 void loop(){
+  wm.process();  // WiFi non-blocking loop
 
   static unsigned long t = millis();
   if(millis()-t > 100){
+    // Update WiFi Status
+    if(wm.getLastConxResult() == 3){
+      states[STATE_WIFI] = 1;
+    } else {
+      states[STATE_WIFI] = 0;
+    }
+    // Update Pump status
     if(states[STATE_SOURCE] == SOURCE_TAP){
       states[STATE_PUMP] = HIGH;
     } else {
       states[STATE_PUMP] = LOW;
     }
+    // Update Outputs status
     actuators.write_states(states);
   }
   screen.update();
@@ -85,7 +105,3 @@ void menu_navigate(){
   return;
 }
 
-
-void index_html(){
-  return;
-}
