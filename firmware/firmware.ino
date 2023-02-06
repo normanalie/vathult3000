@@ -62,6 +62,8 @@ void setup(){
   wm.setAPStaticIPConfig(IPAddress(192,168,1,1), IPAddress(192,168,1,1), IPAddress(255,255,255,0));  // Capttive portal IP
   wm.setTitle("VATHULT3000");
   wm.setClass("invert");  // Captive-portal dark theme
+  const char* wm_menu[] = {"wifi","sep","restart","exit"};
+  wm.setMenu(wm_menu, 4);
   states[STATE_WIFI] = wm.autoConnect("VATHULT3000_Setup");
 }
 
