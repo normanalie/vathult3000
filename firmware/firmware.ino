@@ -20,8 +20,17 @@ For informations about controll see "software" folder.
 /* SELECT BOARD */
 //#define ESP32  // Production version
 #define ESP8266  // Prototype version
+/* MQTT Config */
+#include "mqtt_conf.h"
+/*
+#define MQTT_SERVER   "<server address>"
+#define MQTT_PORT     <port>
+#define MQTT_USER     "<user>"
+#define MQTT_PASSWORD "<password>"
+*/
 
 #include <WiFiManager.h>
+#include <PubSubClient.h>
 #include "flags.h"
 #include "interface.h"
 #include "actuators.h"
@@ -42,6 +51,8 @@ For informations about controll see "software" folder.
 
 // WiFi
 WiFiManager wm;
+// MQTT
+PubSubClient mqtt_client(wm);
 
 Screen screen = Screen(SDA, SCL, states);
 Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
@@ -75,6 +86,11 @@ void loop(){
     // Update WiFi Status
     if(wm.getLastConxResult() == 3){
       states[STATE_WIFI] = 1;
+      if(!mqtt_client.connected()){
+        String client_id = "vathult3000_";
+        client_id += String(random(0xffff), HEX);
+        if(mqtt_client.connect(client_id.c_str(), MQTT_USER, MQTT_PASSWORD))
+      }
     } else {
       states[STATE_WIFI] = 0;
     }
