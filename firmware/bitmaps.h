@@ -3,7 +3,7 @@
 
 /* Graphic library of bitmap icon used by the Screen interface */
 
-#define PROGMEM ICACHE_RODATA_ATTR
+//#define PROGMEM ICACHE_RODATA_ATTR
 
 
 // All the arrays below are generated from images using image2cpp website

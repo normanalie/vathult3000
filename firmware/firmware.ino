@@ -18,8 +18,8 @@ For informations about controll see "software" folder.
 */
 
 /* SELECT BOARD */
-//#define ESP32  // Production version
-#define ESP8266  // Prototype version
+#define ESP32  // Production version
+//#define ESP8266  // Prototype version
 /* MQTT Config */
 #include "mqtt_conf.h"
 /*
