@@ -15,6 +15,10 @@ const methodOverride = require('method-override');
 const mysql = require('mysql');
 const mysqlLogID = require('./mysql-log-id.json');
 const dbStructure = require('./db-structure.json');
+
+const mqtt = require('mqtt');
+const mqttLogID = require('./mqtt-log-id.json');
+
 const LocalStrategy = require('passport-local').Strategy;
 
 
@@ -37,6 +41,43 @@ db.connect(err => {                        // Connect to MySQL
 
 defaultDBCheck();                          // Select and check default website DB 
 
+
+/* MQTT */
+
+const mqttHost = mqttLogID.defaultUser.host
+const mqttPort = mqttLogID.defaultUser.port
+const mqttClientID = `mqtt_${Math.random().toString(16).slice(3)}`
+
+const mqttConnectURL = `mqtt://${mqttHost}:${mqttPort}`
+
+
+const mqttApp = mqtt.connect(mqttConnectURL, {
+    mqttClientID,
+    clean: mqttLogID.defaultUser.clean,
+    connectTimeout: mqttLogID.defaultUser.connectTimeout,
+    username: mqttLogID.defaultUser.username,
+    password: mqttLogID.defaultUser.password,
+    reconnectPeriod: mqttLogID.defaultUser.reconnectPeriod,
+})
+
+let mqttTopic = '/nodejs/mqtt/3/';
+
+mqttApp.on('connect', () => {
+    console.log('(MQTT) [i] - MQTT connection established');
+    mqttApp.subscribe([mqttTopic], () => {
+      console.log(`(MQTT) [i] - Subscribed to topic [${mqttTopic}]`);
+    });
+
+    mqttApp.publish(mqttTopic, '(Test) MQTT Boot Message', { qos: 0, retain: false }, (error) => {  //Test message
+        if (error) {
+          console.error(error)
+        }
+    });
+})
+
+mqttApp.on('message', (topic, payload) => {
+    console.log(`(MQTT) [<--] - [${topic}] ${payload.toString()}`);
+})
 
 
 // Passport.JS

@@ -1,0 +1,12 @@
+{
+    "defaultUser" : {
+        "host": "broker.emqx.io",
+        "port": "1883",
+        "clientID" : "???",
+        "clean": true,
+        "connectTimeout": 4000,
+        "username": "emqx",
+        "password": "public",
+        "reconnectPeriod": 1000
+    }
+}
