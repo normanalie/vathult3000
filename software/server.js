@@ -221,26 +221,99 @@ app.post('/save-new-email', checkAuthenticated, (req, res) => {     // TODO: [A 
 
 /* DEVICE PART */
 app.get('/devices', checkAuthenticated, (req, res) => {
-    res.render('devices.ejs');
+
+    
+    let vathultList;
+    let post = {id: req.user.id}
+    let sql = `SELECT * FROM ${dbStructure.defaultDB.Vathults.tableName} WHERE ${dbStructure.defaultDB.Vathults.userID} = '${req.user.id}'`;
+    
+    db.query(sql, post, async (err, results) => {
+        if (err) {
+            console.log(`(MySQL) [ERROR!] - Devices search failure`);
+            res.redirect('/dashboard');
+            return console.log(err);
+        } else {
+            vathultList = results;
+            res.render('devices.ejs', {vathultList: vathultList});
+        }
+    }); 
 })
 
 app.get('/new-device', checkAuthenticated, (req, res) => {
     res.render('new-device.ejs');
 })
 
-app.get('/save-new-device', checkAuthenticated, (req, res) => {  // TODO: [A programmer]
+app.post('/new-device', checkAuthenticated, (req, res) => {
+
+    try {
+
+        let columns = `${dbStructure.defaultDB.Vathults.serialNumber},
+                       ${dbStructure.defaultDB.Vathults.userID}
+                       ${req.body.deviceName ? `, ${dbStructure.defaultDB.Vathults.name}` : ""}`;
+
+        let values = `'${req.body.serialNumber}',
+                      '${req.user.id}'
+                      ${req.body.deviceName ? `, '${req.body.deviceName}'` : ""}`;
+
+        let sql = `INSERT INTO ${dbStructure.defaultDB.Vathults.tableName} (${columns}) VALUES (${values})`;
+        db.query(sql, (err) => {
+            if (err) {
+                console.log(`(MySQL) [ERROR!] - Unable to save new Vathults`);
+                console.log(err);
+                res.redirect('/new-device');
+            } else {
+                console.log(`(MySQL) [i] - New Vathults "${req.body.serialNumber}" successfully registered`);
+                res.redirect('/devices');
+            }
+        })
+
+    } catch {
+        res.redirect('/new-device');
+    }
+
     // Save new device in DB. Set inputs/outputs to "null" (await device's real state)
 })
 
-app.get('/device/1', checkAuthenticated, (req, res) => {   // TODO: Remplacer le "1" par une variable qui s'adapte en en fonction de l'ID de l'appareil 
-    res.render('device-info.ejs');
+app.post('/device/:deviceID/remove', checkAuthenticated, (req, res) => {  // TODO: [A programmer par rapport à l'ESP-32]
+    
+    let post = {id: req.params.deviceID}
+    let sql = `DELETE FROM ${dbStructure.defaultDB.Vathults.tableName} WHERE ${dbStructure.defaultDB.Vathults.id} = '${req.params.deviceID}'`;
+    
+    db.query(sql, post, async (err, results) => {
+        if (err) {
+            console.log(`(MySQL) [ERROR!] - Failed to delete the device from the list`);
+            res.redirect('/devices');
+            return console.log(err);
+        } else {
+            console.log(`(MySQL) [i] - Vathults with ID "${req.params.deviceID}" successfully deleted`);
+            res.redirect('/devices');
+        }
+    });
 })
 
-app.post('/device/:device-id>/setoutput/:output-id/:state', checkAuthenticated, (req, res) => {  // TODO: [A programmer par rapport à l'ESP-32]
+app.get('/device/:deviceID', checkAuthenticated, (req, res) => {
+    
+    let vathultInfo;
+    let post = {id: req.params.deviceID}
+    let sql = `SELECT * FROM ${dbStructure.defaultDB.Vathults.tableName} WHERE ${dbStructure.defaultDB.Vathults.id} = '${req.params.deviceID}'`;
+    
+    db.query(sql, post, async (err, results) => {
+        if (err) {
+            console.log(`(MySQL) [ERROR!] - Device info search failure`);
+            res.redirect('/dashboard');
+            return console.log(err);
+        } else {
+            vathultInfo = results;
+            res.render('device-info.ejs', {vathultInfo: vathultInfo});
+        }
+    });
+})
+
+app.post('/device/:deviceID/setoutput/:output-id/:state', checkAuthenticated, (req, res) => {  // TODO: [A programmer par rapport à l'ESP-32]
     // Set device output state
 })
 
-app.post('/device/:device-id/setsource/:source', checkAuthenticated, (req, res) => {             // TODO: [A programmer par rapport à l'ESP-32]
+app.post('/device/:deviceID/setsource/:source', checkAuthenticated, (req, res) => {             // TODO: [A programmer par rapport à l'ESP-32]
     // Set device water source
 })
 

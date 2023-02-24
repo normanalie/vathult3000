@@ -13,16 +13,23 @@
     <body>
 
         <h1>Your Vathys</h1>
+        <% if (vathultList[0]) { %>
+            <%for (i = 0; i < vathultList.length; i++) { %>
 
+                <p><%= `${vathultList[i].name ? vathultList[i].name : vathultList[i].serial_number}` %></p>
+                <form action="/device/<%= vathultList[i].id %>" method="GET">
 
-        <p>Dummy 1</p>
-        <form action="/device/1" method="GET">
+                    <button type="submit"><%= `${vathultList[i].name ? vathultList[i].name : vathultList[i].serial_number}` %> Overview</button>
 
-            <button type="submit">Dummu 1 Overview</button>
-
-        </form>
-
-        <!--  TODO
+                </form>
+        <% } %>
+            
+        <%} else { %>
+            <p>No registered Vathys!</p>
+        <% } %>
+        
+        
+        <br>
 
         <form action="/new-device" method="GET">
 
@@ -30,7 +37,7 @@
         
         </form>
 
-        -->
+        <br>
 
         <form action="/dashboard" method="GET">
 

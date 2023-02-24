@@ -6,23 +6,26 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">  
 
-        <title>Dummy 1</title>
+        <title><%= `${vathultInfo[0].name ? vathultInfo[0].name : vathultInfo[0].serial_number}` %> Overview</title>
 
     </head>
 
     <body>
 
-        <h1>Dummy 1</h1>
+        <h1><%= `${vathultInfo[0].name ? vathultInfo[0].name : vathultInfo[0].serial_number}` %></h1>
 
 
         <h2>Overview</h2>
-        <p>Online since 01-31-23</p>
-        <p>* Rain Water Level : OK</p>
-        <p>* Vavle 1 : ON</p>
-        <p>* Vavle 2 : ON</p>
-        <p>* Vavle 3 : ON</p>
-        <p>* Vavle 4 : OFF</p>
-        <p># Error detected : 0</p>
+        <p>Online since <%= vathultInfo[0].last_seen %> </p>
+        <p>* Input 1 : <%= vathultInfo[0].input1 %></p>
+        <p>* Input 2 : <%= vathultInfo[0].input2 %></p>
+        <p>* Pump : <%= vathultInfo[0].pump %></p>
+        <p>* Vavle 1 : <%= vathultInfo[0].output1 %></p>
+        <p>* Vavle 2 : <%= vathultInfo[0].output2 %></p>
+        <p>* Vavle 3 : <%= vathultInfo[0].output3 %></p>
+        <p>* Vavle 4 : <%= vathultInfo[0].output4 %></p>
+        <p># Error(s) detected : <%= vathultInfo[0].errors %></p>
+        <p>[i] Serial Number : <%= vathultInfo[0].serial_number %></p>
 
 
         <form action="/devices" method="GET">
@@ -36,6 +39,16 @@
             <button type="submit">Dashboard</button>
 
         </form>
+
+        <br>
+
+        <form action="/device/<%= vathultInfo[0].id %>/remove" method="POST">
+
+            <button type="submit">Remove <%= `${vathultInfo[0].name ? vathultInfo[0].name : vathultInfo[0].serial_number}` %></button>
+
+        </form>
+
+        <br>
 
         <form action="/logout?_method=DELETE" method="POST">
 
