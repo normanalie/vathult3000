@@ -30,7 +30,7 @@ For informations about controll see "software" folder.
 */
 
 #include <WiFiManager.h>
-#include <PubSubClient.h>
+//#include <PubSubClient.h>
 #include "flags.h"
 #include "interface.h"
 #include "actuators.h"
@@ -45,14 +45,14 @@ For informations about controll see "software" folder.
   #define SCL D5
 #endif
 #ifdef ESP32
-  #define SDA 0
-  #define SCL 1
+  #define SDA 1
+  #define SCL 2
 #endif
 
 // WiFi
 WiFiManager wm;
 // MQTT
-PubSubClient mqtt_client(wm);
+//PubSubClient mqtt_client(wm);
 
 Screen screen = Screen(SDA, SCL, states);
 Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
@@ -64,7 +64,9 @@ void menu_navigate();
 void setup(){
   Serial.begin(9600);
   // I/O
-  screen.begin();
+  if(!screen.begin()){
+    Serial.println("PRPRPRPPRPRPPPRPRPRPPPPP");
+  }
   keyboard.begin();
   if(!actuators.begin()) screen.error = "Output not found";
   // WiFi
@@ -86,11 +88,11 @@ void loop(){
     // Update WiFi Status
     if(wm.getLastConxResult() == 3){
       states[STATE_WIFI] = 1;
-      if(!mqtt_client.connected()){
+     /* if(!mqtt_client.connected()){
         String client_id = "vathult3000_";
         client_id += String(random(0xffff), HEX);
         if(mqtt_client.connect(client_id.c_str(), MQTT_USER, MQTT_PASSWORD))
-      }
+      }*/
     } else {
       states[STATE_WIFI] = 0;
     }
