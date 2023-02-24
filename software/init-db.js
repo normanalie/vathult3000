@@ -124,9 +124,9 @@ function selectVathultTable() {       // Does "vathults" table exist?
                 let columns = `${dbStructure.defaultDB.Vathults.id} int AUTO_INCREMENT UNIQUE NOT NULL,
                                ${dbStructure.defaultDB.Vathults.serialNumber} VARCHAR(255) UNIQUE NOT NULL,
                                ${dbStructure.defaultDB.Vathults.userID} int NOT NULL,
-                               ${dbStructure.defaultDB.Vathults.name} VARCHAR(255) NOT NULL,
+                               ${dbStructure.defaultDB.Vathults.name} VARCHAR(255),
                                ${dbStructure.defaultDB.Vathults.lastSeen} DATETIME,
-                               ${dbStructure.defaultDB.Vathults.errors} int,
+                               ${dbStructure.defaultDB.Vathults.errors} VARCHAR(255),
                                ${dbStructure.defaultDB.Vathults.pump} BOOLEAN,
                                ${dbStructure.defaultDB.Vathults.input1} int,
                                ${dbStructure.defaultDB.Vathults.input2} int,
@@ -134,7 +134,8 @@ function selectVathultTable() {       // Does "vathults" table exist?
                                ${dbStructure.defaultDB.Vathults.output2} BOOLEAN,
                                ${dbStructure.defaultDB.Vathults.output3} BOOLEAN,
                                ${dbStructure.defaultDB.Vathults.output4} BOOLEAN,
-                               PRIMARY KEY (${dbStructure.defaultDB.Vathults.id})`;
+                               PRIMARY KEY (${dbStructure.defaultDB.Vathults.id}),
+                               FOREIGN KEY (${dbStructure.defaultDB.Vathults.userID}) REFERENCES ${dbStructure.defaultDB.Users.tableName}(${dbStructure.defaultDB.Users.id}) ON DELETE CASCADE ON UPDATE CASCADE`;
                 sql = `CREATE TABLE ${dbStructure.defaultDB.Vathults.tableName}(${columns})`
                 db.query(sql, err => {
                 if (err) {
