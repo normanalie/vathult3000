@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {   // If dev mode enabled, use ".env" file for environment variables and XAMPP for fake MySQL server
     require('dotenv').config();
     console.log(`~(SERVER)~ [WARNING!] - Dev Mode enabled!`);
-    console.log(`~(SERVER)~ [Dev # i] - Website link : "localhost:3000"`);
+    console.log(`~(SERVER)~ [Dev # i] - Server running on http://localhost:3000`);
 }
 
 
