@@ -61,6 +61,10 @@ Screen screen = Screen(SDA, SCL, states);
 Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
 Actuators actuators = Actuators(0b0100000, SDA, SCL);
 
+
+void setup_io();
+void setup_wifi();
+void setup_mqtt();
 void index_html();
 void menu_navigate();
 void mqtt_reconnect();
@@ -68,23 +72,9 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length);
 
 void setup(){
   Serial.begin(9600);
-  // I/O
-  screen.begin()
-  if(!keyboard.begin()) screen.error = "Keyboard not found";
-  if(!actuators.begin()) screen.error = "Output not found";
-  // WiFi
-  WiFi.mode(WIFI_STA);  // For sanity
-  wm.setConfigPortalBlocking(false); 
-  wm.setAPStaticIPConfig(IPAddress(192,168,1,1), IPAddress(192,168,1,1), IPAddress(255,255,255,0));  // Capttive portal IP
-  wm.setTitle("VATHULT3000");
-  wm.setClass("invert");  // Captive-portal dark theme
-  const char* wm_menu[] = {"wifi","sep","restart","exit"};
-  wm.setMenu(wm_menu, 4);
-  states[STATE_WIFI] = wm.autoConnect("VATHULT3000_Setup");
-  //MQTT
-  mqtt_client_id += String(random(0xffff), HEX);
-  mqtt_client.setServer(MQTT_SERVER, MQTT_PORT);
-  mqtt_client.setCallback(mqtt_callback);
+  setup_io();
+  setup_wifi();
+  setup_mqtt();
 }
 
 void loop(){
@@ -119,6 +109,35 @@ void loop(){
   keyboard.update();
   menu_navigate();
 }
+
+void setup_io(){
+  screen.begin();
+  if(!keyboard.begin()) screen.error = "Keyboard not found";
+  if(!actuators.begin()) screen.error = "Output not found";
+  return;
+}
+
+void setup_wifi(){
+  WiFi.mode(WIFI_STA);  // For sanity
+  wm.setConfigPortalBlocking(false); 
+  wm.setAPStaticIPConfig(IPAddress(192,168,1,1), IPAddress(192,168,1,1), IPAddress(255,255,255,0));  // Capttive portal IP
+  // UI
+  wm.setTitle("VATHULT3000");
+  wm.setClass("invert");  // Captive-portal dark theme
+  const char* wm_menu[] = {"wifi","sep","restart","exit"};  // Captive portal menu buttons (sep = separator)
+  wm.setMenu(wm_menu, 4);
+  // Start
+  states[STATE_WIFI] = wm.autoConnect("VATHULT3000_Setup");
+  return;
+}
+
+void setup_mqtt(){
+  mqtt_client_id += String(random(0xffff), HEX);
+  mqtt_client.setServer(MQTT_SERVER, MQTT_PORT);
+  mqtt_client.setCallback(mqtt_callback);
+  return;
+}
+
 
 void menu_navigate(){
   static unsigned long t = millis();
