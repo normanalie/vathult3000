@@ -10,7 +10,7 @@ Firmware V0.1
 
 Requirements:
  - ESP with WiFi capabilities
- - CPU Frequency: 160MHz
+ - CPU Frequency: 160MHz or higher
  - Erase Flash: USe "All flash content" the first time or to reset wifi creditentials memory
 
 For informations about wiring see the "hardware" folder.
@@ -20,6 +20,7 @@ For informations about controll see "software" folder.
 /* SELECT BOARD */
 #define ESP32  // Production version
 //#define ESP8266  // Prototype version
+
 /* MQTT Config */
 #include "mqtt_conf.h"
 /*
@@ -30,7 +31,7 @@ For informations about controll see "software" folder.
 */
 
 #include <WiFiManager.h>
-//#include <PubSubClient.h>
+#include <PubSubClient.h>
 #include "flags.h"
 #include "interface.h"
 #include "actuators.h"
@@ -50,9 +51,11 @@ For informations about controll see "software" folder.
 #endif
 
 // WiFi
+WiFiClient espClient;
 WiFiManager wm;
 // MQTT
-//PubSubClient mqtt_client(wm);
+PubSubClient mqtt_client(espClient);
+String mqtt_client_id = "vathult3000_";
 
 Screen screen = Screen(SDA, SCL, states);
 Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
@@ -60,13 +63,13 @@ Actuators actuators = Actuators(0b0100000, SDA, SCL);
 
 void index_html();
 void menu_navigate();
+void mqtt_reconnect();
+void mqtt_callback(char* topic, byte* payload, unsigned int length);
 
 void setup(){
   Serial.begin(9600);
   // I/O
-  if(!screen.begin()){
-    Serial.println("PRPRPRPPRPRPPPRPRPRPPPPP");
-  }
+  screen.begin()
   keyboard.begin();
   if(!actuators.begin()) screen.error = "Output not found";
   // WiFi
@@ -78,6 +81,10 @@ void setup(){
   const char* wm_menu[] = {"wifi","sep","restart","exit"};
   wm.setMenu(wm_menu, 4);
   states[STATE_WIFI] = wm.autoConnect("VATHULT3000_Setup");
+  //MQTT
+  mqtt_client_id += String(random(0xffff), HEX);
+  mqtt_client.setServer(MQTT_SERVER, MQTT_PORT);
+  mqtt_client.setCallback(mqtt_callback);
 }
 
 void loop(){
@@ -88,13 +95,16 @@ void loop(){
     // Update WiFi Status
     if(wm.getLastConxResult() == 3){
       states[STATE_WIFI] = 1;
-     /* if(!mqtt_client.connected()){
-        String client_id = "vathult3000_";
-        client_id += String(random(0xffff), HEX);
-        if(mqtt_client.connect(client_id.c_str(), MQTT_USER, MQTT_PASSWORD))
-      }*/
     } else {
       states[STATE_WIFI] = 0;
+    }
+    // Update MQTT
+    if(states[STATE_WIFI]){
+      if(!mqtt_client.connected()){
+          mqtt_reconnect();
+      } else {
+        mqtt_client.loop();
+      }
     }
     // Update Pump status
     if(states[STATE_SOURCE] == SOURCE_TAP){
@@ -122,6 +132,33 @@ void menu_navigate(){
     }
     t = millis();
   }
+  return;
+}
+
+
+void mqtt_reconnect(){
+  if(!mqtt_client.connected()){
+    if(mqtt_client.connect(mqtt_client_id.c_str(), MQTT_USER, MQTT_PASSWORD)){  // Attempt to connect
+      Serial.println("MQTT Connected");
+      mqtt_client.publish("/nodejs/mqtt/3/", "Hello from ESP");
+      mqtt_client.subscribe("/nodejs/mqtt/3/");
+    } else {
+      Serial.println("MQTT Failed to connect");
+      Serial.println(mqtt_client.state());
+      screen.error = "MQTT Error";
+    }
+  }
+  return;
+}
+
+void mqtt_callback(char* topic, byte* payload, unsigned int length){
+  Serial.print("MQTT Message arrived on [");
+  Serial.print(topic);
+  Serial.println("]");
+  for(int c=0; c<length; c++){
+    Serial.print((char)payload[c]);
+  }
+  Serial.println();
   return;
 }
 
