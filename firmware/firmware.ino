@@ -70,7 +70,7 @@ void setup(){
   Serial.begin(9600);
   // I/O
   screen.begin()
-  keyboard.begin();
+  if(!keyboard.begin()) screen.error = "Keyboard not found";
   if(!actuators.begin()) screen.error = "Output not found";
   // WiFi
   WiFi.mode(WIFI_STA);  // For sanity
