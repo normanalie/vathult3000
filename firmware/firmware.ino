@@ -83,7 +83,7 @@ void loop(){
   static unsigned long t = millis();
   if(millis()-t > 100){
     // Update WiFi Status
-    if(wm.getLastConxResult() == 3){
+    if(wm.getWLStatusString() == "WL_CONNECTED"){  // WiFi connected 
       states[STATE_WIFI] = 1;
     } else {
       states[STATE_WIFI] = 0;
