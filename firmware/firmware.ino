@@ -2,16 +2,16 @@
 ============== VÂTHULT3000 ==============
 --- Smart multi-zones watering system ---
 
-Firmware V0.1
+Firmware V1
  - Developped by: Norman ALIE, Julian DOLOIR, Victor MEULIN
  - Society: ISTY
  - Contact: Norman ALIE <mail@normanalie.fr>
  - License: CC BY-SA
 
 Requirements:
- - ESP with WiFi capabilities
+ - Custom PCB based on ESP32-C3 (see hardware folder)
  - CPU Frequency: 160MHz or higher
- - Erase Flash: USe "All flash content" the first time or to reset wifi creditentials memory
+ - Erase Flash: Use "All flash content" the first time or to reset wifi creditentials memory
 
 For informations about wiring see the "hardware" folder.
 For informations about controll see "software" folder.
@@ -19,7 +19,6 @@ For informations about controll see "software" folder.
 
 /* SELECT BOARD */
 #define ESP32  // Production version
-//#define ESP8266  // Prototype version
 
 /* MQTT Config */
 #include "mqtt_conf.h"
@@ -37,17 +36,9 @@ For informations about controll see "software" folder.
 #include "actuators.h"
 #include "flows.h"
 
-#ifdef ARDUINO
-  #define SDA A4
-  #define SCL A5
-#endif
-#ifdef ESP8266
-  #define SDA D4
-  #define SCL D5
-#endif
 #ifdef ESP32
-  #define SDA 1
-  #define SCL 2
+  #define SDA 5
+  #define SCL 6
 #endif
 
 // WiFi
