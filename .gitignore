@@ -50,3 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+firmware/mqtt_conf.h
+firmware/debug.cfg
+firmware/debug_custom.json
+firmware/esp32s2.svd
