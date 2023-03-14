@@ -17,14 +17,16 @@
 
         <h2>Overview</h2>
         <p>Online since <%= vathultInfo[0].last_seen %> </p>
-        <p>* Input 1 : <%= vathultInfo[0].input1 %></p>
-        <p>* Input 2 : <%= vathultInfo[0].input2 %></p>
-        <p>* Pump : <%= vathultInfo[0].pump %></p>
+        <p>* Input type : <%= vathultInfo[0].input %></p>
+        <p>* flow : <%= vathultInfo[0].flow %></p>
         <p>* Vavle 1 : <%= vathultInfo[0].output1 %></p>
         <p>* Vavle 2 : <%= vathultInfo[0].output2 %></p>
         <p>* Vavle 3 : <%= vathultInfo[0].output3 %></p>
         <p>* Vavle 4 : <%= vathultInfo[0].output4 %></p>
-        <p># Error(s) detected : <%= vathultInfo[0].errors %></p>
+        <p>* Water alert : <%= vathultInfo[0].water_alert %></p>
+        <p># Messages : <%= vathultInfo[0].messages %></p>
+        <p># Wi-Fi Strength : <%= vathultInfo[0].wifi_strength %></p>
+        <p># Wi-Fi SSID : <%= vathultInfo[0].wifi_ssid %></p>
         <p>[i] Serial Number : <%= vathultInfo[0].serial_number %></p>
 
 

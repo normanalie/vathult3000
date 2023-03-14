@@ -60,23 +60,65 @@ const mqttApp = mqtt.connect(mqttConnectURL, {
     reconnectPeriod: mqttLogID.defaultUser.reconnectPeriod,
 })
 
-let mqttTopic = '/nodejs/mqtt/3/';
+let mqttTopicBase = 'vathult3000';
 
 mqttApp.on('connect', () => {
+
     console.log('(MQTT) [i] - MQTT connection established');
-    mqttApp.subscribe([mqttTopic], () => {
-      console.log(`(MQTT) [i] - Subscribed to topic [${mqttTopic}]`);
+
+    const mqttTopic = `${mqttTopicBase}/+`
+
+    mqttApp.subscribe([mqttTopic], (err) => {
+
+        if (err) {
+            console.log(`(MQTT) [ERROR!] - Failed to subscribe to topic(s) [${mqttTopic}]`);
+            throw err;
+        }
+        console.log(`(MQTT) [i] - Subscribed to topic [${mqttTopic}]`);
     });
 
-    mqttApp.publish(mqttTopic, '(Test) MQTT Boot Message', { qos: 0, retain: false }, (error) => {  //Test message
+    mqttApp.publish(`${mqttTopicBase}/TEST`, '(Test) MQTT Boot Message', { qos: 0, retain: false }, (error) => {  //Test message
         if (error) {
-          console.error(error)
+            console.log(`(MQTT) [ERROR!] - Failed to send test to topic(s) [${mqttTopic}]`);
+            console.error(error)
         }
     });
 })
 
 mqttApp.on('message', (topic, payload) => {
-    console.log(`(MQTT) [<--] - [${topic}] ${payload.toString()}`);
+
+    let message = payload.toString();
+    console.log(`(MQTT) [<--] - [${topic}] ${message}`);
+
+    const devicetype = topic.split('/')[0];
+
+    if (devicetype == mqttTopicBase && topic != `${mqttTopicBase}/TEST`) {
+        const serialNumber = topic.slice(12);
+        message = JSON.parse(message);
+
+        
+        let sql = `UPDATE ${dbStructure.defaultDB.Vathults.tableName}
+                   SET ${dbStructure.defaultDB.Vathults.flow} = '${message.flow}',
+                       ${dbStructure.defaultDB.Vathults.waterAlert} = '${message.water_alert}',
+                       ${dbStructure.defaultDB.Vathults.input} = '${message.input}',
+                       ${dbStructure.defaultDB.Vathults.output1} = '${message.output1}',
+                       ${dbStructure.defaultDB.Vathults.output2} = '${message.output2}',
+                       ${dbStructure.defaultDB.Vathults.output3} = '${message.output3}',
+                       ${dbStructure.defaultDB.Vathults.output4} = '${message.output4}',
+                       ${dbStructure.defaultDB.Vathults.wifiStrength} = '${message.wifi_strength}',
+                       ${dbStructure.defaultDB.Vathults.wifiSSID} = '${message.wifi_ssid}',
+                       ${dbStructure.defaultDB.Vathults.messages} = '${JSON.stringify(message.messages)}'
+                   WHERE ${dbStructure.defaultDB.Vathults.serialNumber} = '${serialNumber}'`;
+        
+        db.query(sql, (err) => {
+            if (err) {
+                console.log(`(MySQL) [ERROR!] - Unable to save Vathults datas (SN: ${serialNumber}) `);
+                console.log(err);
+            } else {
+                console.log(`(MySQL) [i] - Vathults Data successfully registered (SN: ${serialNumber})`);
+            }
+        })
+    }
 })
 
 
@@ -84,18 +126,18 @@ mqttApp.on('message', (topic, payload) => {
 
 const authentificateUser = async (email, password, done) => {
     let user;
-    let post = {mail: email}
+    let post = { mail: email }
     let sql = `SELECT * FROM ${dbStructure.defaultDB.Users.tableName} WHERE ${dbStructure.defaultDB.Users.mail} = '${email}'`;
     db.query(sql, post, async (err, results) => {
         if (err) {
             console.log(`(MySQL) [ERROR!] - Email search failure`);
             return console.log(err);
         } else if (results.length == 0) {
-            return done(null, false, { message: 'No user with that email'});
+            return done(null, false, { message: 'No user with that email' });
         }
 
-        user = {id: results[0].id, name: results[0].name, passwordHash: results[0].password_hash};
-        
+        user = { id: results[0].id, name: results[0].name, passwordHash: results[0].password_hash };
+
         try {
 
             if (await bcrypt.compare(password, user.passwordHash)) {
@@ -103,19 +145,19 @@ const authentificateUser = async (email, password, done) => {
             } else {
                 return done(null, false, { message: 'Incorrect password' });
             }
-    
+
         } catch (e) {
             return done(e);
         }
     });
 }
 
-passport.use(new LocalStrategy ({ usernameField: 'email', passwordField: 'password' }, authentificateUser));
+passport.use(new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, authentificateUser));
 
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser((id, done) => {
 
-    let post = {id: id}
+    let post = { id: id }
     let sql = `SELECT * FROM ${dbStructure.defaultDB.Users.tableName} WHERE ${dbStructure.defaultDB.Users.id} = '${id}'`;
     db.query(sql, post, async (err, results) => {
         if (err) {
@@ -135,7 +177,7 @@ passport.deserializeUser((id, done) => {
 app.set('view-engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
 app.use(flash());
-app.use(session( {
+app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false
@@ -160,7 +202,7 @@ app.get('/', (req, res) => {
 
 /* LOGIN / LOGOUT / REGISTER PART */
 app.get('/login', checkNotAuthenticated, (req, res) => {
-    res.render('login.ejs' );
+    res.render('login.ejs');
 })
 
 app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
@@ -171,15 +213,15 @@ app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
 
 
 app.delete('/logout', (req, res, next) => {
-    req.logOut( err => {
-        if (err) {return next(err)}
+    req.logOut(err => {
+        if (err) { return next(err) }
     });
     res.redirect('/login');
 })
 
 
 app.get('/register', checkNotAuthenticated, (req, res) => {
-    res.render('register.ejs' );
+    res.render('register.ejs');
 })
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
@@ -224,38 +266,38 @@ app.post('/validate/:user-id/:uid', (req, res) => {      // TODO: [A programmer]
 })
 
 app.get('/dashboard', checkAuthenticated, (req, res) => {
-    res.render('dashboard.ejs', {name: req.user.name} );
+    res.render('dashboard.ejs', { name: req.user.name });
 })
 
 
 
 /* USER PART */
 app.get('/user-profile', checkAuthenticated, (req, res) => {
-    res.render('user-profile.ejs', {name: req.user.name} );
+    res.render('user-profile.ejs', { name: req.user.name });
 })
 
 app.get('/change-name', checkAuthenticated, (req, res) => {
-    res.render('change-name.ejs', {name: req.user.name} );
+    res.render('change-name.ejs', { name: req.user.name });
 })
 
 app.get('/change-email', checkAuthenticated, (req, res) => {
-    res.render('change-email.ejs', {name: req.user.name} );
+    res.render('change-email.ejs', { name: req.user.name });
 })
 
 app.get('/change-password', checkAuthenticated, (req, res) => {
-    res.render('change-password.ejs', {name: req.user.name} );
+    res.render('change-password.ejs', { name: req.user.name });
 })
 
 app.post('/save-new-password', checkAuthenticated, (req, res) => {   // TODO: [A programmer]
-    
+
 })
 
 app.post('/save-new-name', checkAuthenticated, (req, res) => {      // TODO: [A programmer]
-    
+
 })
 
 app.post('/save-new-email', checkAuthenticated, (req, res) => {     // TODO: [A programmer]
-    
+
 })
 
 
@@ -263,11 +305,11 @@ app.post('/save-new-email', checkAuthenticated, (req, res) => {     // TODO: [A 
 /* DEVICE PART */
 app.get('/devices', checkAuthenticated, (req, res) => {
 
-    
+
     let vathultList;
-    let post = {id: req.user.id}
+    let post = { id: req.user.id }
     let sql = `SELECT * FROM ${dbStructure.defaultDB.Vathults.tableName} WHERE ${dbStructure.defaultDB.Vathults.userID} = '${req.user.id}'`;
-    
+
     db.query(sql, post, async (err, results) => {
         if (err) {
             console.log(`(MySQL) [ERROR!] - Devices search failure`);
@@ -275,9 +317,9 @@ app.get('/devices', checkAuthenticated, (req, res) => {
             return console.log(err);
         } else {
             vathultList = results;
-            res.render('devices.ejs', {vathultList: vathultList});
+            res.render('devices.ejs', { vathultList: vathultList });
         }
-    }); 
+    });
 })
 
 app.get('/new-device', checkAuthenticated, (req, res) => {
@@ -316,10 +358,10 @@ app.post('/new-device', checkAuthenticated, (req, res) => {
 })
 
 app.post('/device/:deviceID/remove', checkAuthenticated, (req, res) => {  // TODO: [A programmer par rapport à l'ESP-32]
-    
-    let post = {id: req.params.deviceID}
+
+    let post = { id: req.params.deviceID }
     let sql = `DELETE FROM ${dbStructure.defaultDB.Vathults.tableName} WHERE ${dbStructure.defaultDB.Vathults.id} = '${req.params.deviceID}'`;
-    
+
     db.query(sql, post, async (err, results) => {
         if (err) {
             console.log(`(MySQL) [ERROR!] - Failed to delete the device from the list`);
@@ -333,11 +375,11 @@ app.post('/device/:deviceID/remove', checkAuthenticated, (req, res) => {  // TOD
 })
 
 app.get('/device/:deviceID', checkAuthenticated, (req, res) => {
-    
+
     let vathultInfo;
-    let post = {id: req.params.deviceID}
+    let post = { id: req.params.deviceID }
     let sql = `SELECT * FROM ${dbStructure.defaultDB.Vathults.tableName} WHERE ${dbStructure.defaultDB.Vathults.id} = '${req.params.deviceID}'`;
-    
+
     db.query(sql, post, async (err, results) => {
         if (err) {
             console.log(`(MySQL) [ERROR!] - Device info search failure`);
@@ -345,7 +387,7 @@ app.get('/device/:deviceID', checkAuthenticated, (req, res) => {
             return console.log(err);
         } else {
             vathultInfo = results;
-            res.render('device-info.ejs', {vathultInfo: vathultInfo});
+            res.render('device-info.ejs', { vathultInfo: vathultInfo });
         }
     });
 })

@@ -1,0 +1,18 @@
+{    
+    "input" : "rain",
+    "flow" : 40,
+    "output1" : 1,
+    "output2" : 0,
+    "output3" : 1,
+    "output4" : 0,
+    "water_alert" : 1,
+    "messages" : [
+        {
+            "type" : 0,
+            "id" : "INFO_START",
+            "message" : "[BOOT] Vathult3000 Started !"
+        }
+    ],
+    "wifi_strength" : 4,
+    "wifi_ssid" : "s54f2ds1s31s35df4s351ss65f4"
+}

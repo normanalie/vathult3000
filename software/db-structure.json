@@ -20,14 +20,16 @@
             "userID" : "user_id",
             "name" : "name",
             "lastSeen" : "last_seen",
-            "errors" : "errors",
-            "pump" : "pump",
-            "input1" : "input1",
-            "input2" : "input2",
+            "messages" : "messages",
+            "flow" : "flow",
+            "waterAlert" : "water_alert",
+            "input" : "input",
             "output1" : "output1",
             "output2" : "output2",
             "output3" : "output3",
-            "output4" : "output4"
+            "output4" : "output4",
+            "wifiStrength" : "wifi_strength",
+            "wifiSSID" : "wifi_ssid"
         }
     }
 }
