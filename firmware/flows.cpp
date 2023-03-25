@@ -9,7 +9,7 @@ void IRAM_ATTR pulse_ISR(){
   flow_pulse_counter++;
 }
 
-Flows::Flows(uint8_t pin): {
+Flows::Flows(uint8_t pin) {
   this->pin = pin;
   this->calibration_factor = 4.5;
 }
@@ -25,7 +25,7 @@ uint8_t Flows::read_pin(uint8_t pin, uint8_t timeout_ms){
   attachInterrupt(this->pin, pulse_ISR, FALLING);
   while(flow_pulse_counter < 255){
     if((millis() - start_t) < timeout_ms){
-      return 0
+      return 0;
     }
   } 
   unsigned long end_t = millis();

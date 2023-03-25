@@ -54,7 +54,7 @@ String mqtt_client_id = "vathult3000_";
 Screen screen = Screen(SDA, SCL, states);
 Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
 Actuators actuators = Actuators(0b0100000, SDA, SCL);
-Flows flow = Flows(FOW_PIN);
+Flows flow = Flows(FLOW_PIN);
 
 
 void setup_io();
@@ -101,6 +101,8 @@ void loop(){
     actuators.write_states(states);
     // Update flow sensor
     states[STATE_FLOW] = flow.read_pin(FLOW_PIN, 100);
+    // Update infiltration sensor
+    Serial.println(analogRead(3));
   }
   screen.update();
   keyboard.update();

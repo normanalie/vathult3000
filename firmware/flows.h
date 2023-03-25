@@ -8,7 +8,7 @@
 
 void IRAM_ATTR pulse_ISR();
 
-class Flows: public PCF8574{
+class Flows{
   public:
     Flows(uint8_t pin);
     uint8_t read_pin(uint8_t pin, uint8_t timeout_ms);
