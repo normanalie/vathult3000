@@ -12,8 +12,8 @@
 #define STATE_OUTPUT3   3
 #define STATE_OUTPUT4   4
 #define STATE_PUMP      5
-#define STATE_FLOW_TAP  6
-#define STATE_FLOW_RAIN 7
+#define STATE_FLOW      6
+//#define STATE_FLOW_RAIN 7  == DEPRECATED due to hardware update ==
 #define STATE_WIFI      8 
 
 extern int16_t states[16];
