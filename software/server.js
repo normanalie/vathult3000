@@ -457,7 +457,7 @@ function defaultDBCheck() {
 
 }
 
-function eventLogger(source, type, message, borderCharSource) {    // Log structure example : "[2023/01/28 - 12:41:53] ~(SERVER)~ [BOOT] - Message"
+function eventLogger(source, type, message, borderCharSource) {    // Log structure example : "[2023/01/28 - 12:41:53] ~(Source)~ [Type] - Message"
     const currentDate = new Date;
     const year = `${currentDate.getFullYear()}`;
     const months = `${(currentDate.getMonth()+1) < 10 ? "0" : ""}${currentDate.getMonth()+1}`;
@@ -466,6 +466,6 @@ function eventLogger(source, type, message, borderCharSource) {    // Log struct
     const minutes = `${currentDate.getMinutes() < 10 ? "0" : ""}${currentDate.getMinutes()}`;
     const seconds = `${currentDate.getSeconds() < 10 ? "0" : ""}${currentDate.getSeconds()}`;
 
-    console.log(`%c[${year}/${months}/${date} - ${hours}:${minutes}:${seconds}] %c${borderCharSource}(${source})${borderCharSource} %c[${type}] %c- %c${message}`, "color: grey", "color: yellow", "color: green", "color: grey", "color: white");
+    console.log(`[${year}/${months}/${date} - ${hours}:${minutes}:${seconds}] ${borderCharSource}(${source})${borderCharSource} [${type}] - ${message}`);
 }
 app.listen(3000);  // Voir le site sur "localhost:3000"
