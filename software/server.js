@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {   // If dev mode enabled, use ".env" file for environment variables and XAMPP for fake MySQL server
     require('dotenv').config();
-    console.log(`~(SERVER)~ [WARNING!] - Dev Mode enabled!`);
-    console.log(`~(SERVER)~ [Dev # i] - Server running on http://localhost:3000`);
+    eventLogger("SERVER", "WARNING!", "Dev Mode enabled!", "~");
+    eventLogger("SERVER", "Dev # i", "Server running on http://localhost:3000", "~")
 }
 
 
@@ -32,10 +32,10 @@ const db = mysql.createConnection({        // Init MySQL connection
 
 db.connect(err => {                        // Connect to MySQL
     if (err) {
-        console.log(`(MySQL) [ERROR!] - Unable to connect to MySQL`)
+        eventLogger("MySQL", "ERROR!", "Unable to connect to MySQL", "");
         throw err
     }
-    console.log(`(MySQL) [i] - MySQL connection established`);
+    eventLogger("MySQL", "i", "MySQL connection established", "");
 })
 
 
@@ -64,22 +64,22 @@ let mqttTopicBase = 'vathult3000';
 
 mqttApp.on('connect', () => {
 
-    console.log('(MQTT) [i] - MQTT connection established');
+    eventLogger("MQTT", "i", "MQTT connection established", "");
 
     const mqttTopic = `${mqttTopicBase}/+`
 
     mqttApp.subscribe([mqttTopic], (err) => {
 
         if (err) {
-            console.log(`(MQTT) [ERROR!] - Failed to subscribe to topic(s) [${mqttTopic}]`);
+            eventLogger("MQTT", "ERROR!", `Failed to subscribe to topic(s) [${mqttTopic}]`, "");
             throw err;
         }
-        console.log(`(MQTT) [i] - Subscribed to topic [${mqttTopic}]`);
+        eventLogger("MQTT", "i", `Subscribed to topic [${mqttTopic}]`, "");
     });
 
     mqttApp.publish(`${mqttTopicBase}/TEST`, '(Test) MQTT Boot Message', { qos: 0, retain: false }, (error) => {  //Test message
         if (error) {
-            console.log(`(MQTT) [ERROR!] - Failed to send test to topic(s) [${mqttTopic}]`);
+            eventLogger("MQTT", "ERROR!", `Failed to send test to topic(s) [${mqttTopic}]`, "");
             console.error(error)
         }
     });
@@ -88,7 +88,7 @@ mqttApp.on('connect', () => {
 mqttApp.on('message', (topic, payload) => {
 
     let message = payload.toString();
-    console.log(`(MQTT) [<--] - [${topic}] ${message}`);
+    eventLogger("MQTT", "<--", `[${topic}] ${message}`, "");
 
     const devicetype = topic.split('/')[0];
 
@@ -112,10 +112,10 @@ mqttApp.on('message', (topic, payload) => {
         
         db.query(sql, (err) => {
             if (err) {
-                console.log(`(MySQL) [ERROR!] - Unable to save Vathults datas (SN: ${serialNumber}) `);
+                eventLogger("MySQL", "ERROR!", `Unable to save Vathults datas (SN: ${serialNumber})`, "");
                 console.log(err);
             } else {
-                console.log(`(MySQL) [i] - Vathults Data successfully registered (SN: ${serialNumber})`);
+                eventLogger("MySQL", "i", "Vathults Data successfully registered (SN: ${serialNumber})", "");
             }
         })
     }
@@ -130,7 +130,7 @@ const authentificateUser = async (email, password, done) => {
     let sql = `SELECT * FROM ${dbStructure.defaultDB.Users.tableName} WHERE ${dbStructure.defaultDB.Users.mail} = '${email}'`;
     db.query(sql, post, async (err, results) => {
         if (err) {
-            console.log(`(MySQL) [ERROR!] - Email search failure`);
+            eventLogger("MySQL", "ERROR!", "Email search failure", "");
             return console.log(err);
         } else if (results.length == 0) {
             return done(null, false, { message: 'No user with that email' });
@@ -161,7 +161,7 @@ passport.deserializeUser((id, done) => {
     let sql = `SELECT * FROM ${dbStructure.defaultDB.Users.tableName} WHERE ${dbStructure.defaultDB.Users.id} = '${id}'`;
     db.query(sql, post, async (err, results) => {
         if (err) {
-            console.log(`(MySQL) [ERROR!] - ID search failure`);
+            eventLogger("MySQL", "ERROR!", "ID search failure");
             return console.log(err);
         } else if (results.length == 0) {
             return done(null, false);
@@ -187,7 +187,7 @@ app.use(passport.session());
 app.use(methodOverride('_method'));
 
 
-console.log(`~(SERVER)~ [BOOT] - Server started`)
+eventLogger("SERVER", "BOOT", "Server started", "~");
 
 
 
@@ -243,11 +243,11 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
         let sql = `INSERT INTO ${dbStructure.defaultDB.Users.tableName} (${columns}) VALUES (${values})`;
         db.query(sql, (err) => {
             if (err) {
-                console.log(`(MySQL) [ERROR!] - Unable to register new user`);
+                eventLogger("MySQL", "ERROR!", "Unable to register new user", "");
                 console.log(err);
                 res.redirect('/register');
             } else {
-                console.log(`(MySQL) [i] - New user "${req.body.name}" successfully registered`);
+                eventLogger("MySQL", "i", `New user "${req.body.name}" successfully registered`, "");
                 res.redirect('/login');
             }
         })
@@ -312,7 +312,7 @@ app.get('/devices', checkAuthenticated, (req, res) => {
 
     db.query(sql, post, async (err, results) => {
         if (err) {
-            console.log(`(MySQL) [ERROR!] - Devices search failure`);
+            eventLogger("MySQL", "ERROR!", "Devices search failure", "");
             res.redirect('/dashboard');
             return console.log(err);
         } else {
@@ -341,11 +341,11 @@ app.post('/new-device', checkAuthenticated, (req, res) => {
         let sql = `INSERT INTO ${dbStructure.defaultDB.Vathults.tableName} (${columns}) VALUES (${values})`;
         db.query(sql, (err) => {
             if (err) {
-                console.log(`(MySQL) [ERROR!] - Unable to save new Vathults`);
+                eventLogger("MySQL", "ERROR!", "Unable to save new Vathults", "");
                 console.log(err);
                 res.redirect('/new-device');
             } else {
-                console.log(`(MySQL) [i] - New Vathults "${req.body.serialNumber}" successfully registered`);
+                eventLogger("MySQL", "i", `New Vathults "${req.body.serialNumber}" successfully registered`, "");
                 res.redirect('/devices');
             }
         })
@@ -364,11 +364,11 @@ app.post('/device/:deviceID/remove', checkAuthenticated, (req, res) => {  // TOD
 
     db.query(sql, post, async (err, results) => {
         if (err) {
-            console.log(`(MySQL) [ERROR!] - Failed to delete the device from the list`);
+            eventLogger("MySQL", "ERROR!", "Failed to delete the device from the list", "");
             res.redirect('/devices');
             return console.log(err);
         } else {
-            console.log(`(MySQL) [i] - Vathults with ID "${req.params.deviceID}" successfully deleted`);
+            eventLogger("MySQL", "i", `Vathults with ID "${req.params.deviceID}" successfully deleted`, "");
             res.redirect('/devices');
         }
     });
@@ -382,7 +382,7 @@ app.get('/device/:deviceID', checkAuthenticated, (req, res) => {
 
     db.query(sql, post, async (err, results) => {
         if (err) {
-            console.log(`(MySQL) [ERROR!] - Device info search failure`);
+            eventLogger("MySQL", "ERROR!", "Device info search failure", "");
             res.redirect('/dashboard');
             return console.log(err);
         } else {
@@ -431,30 +431,41 @@ function defaultDBCheck() {
     let sql = `USE ${dbStructure.defaultDB.dbName}`;
     db.query(sql, (err) => {
         if (err) {
-            console.log(`(MySQL) [ERROR!] - Default database "${dbStructure.defaultDB.dbName}" not found`);     // Check if Default DB exists
+            eventLogger("MySQL", "ERROR!", `Default database "${dbStructure.defaultDB.dbName}" not found`, "");     // Check if Default DB exists
             throw err;
         }
-        console.log(`(MySQL) [i] - Default database "${dbStructure.defaultDB.dbName}" selected`);
+        eventLogger("MySQL", "i", `Default database "${dbStructure.defaultDB.dbName}" selected`, "");
     });
 
     sql = `SELECT * FROM ${dbStructure.defaultDB.Users.tableName}`                                             // Check if table "Users" in Default DB exists
     db.query(sql, (err) => {
         if (err) {
-            console.log(`(MySQL) [ERROR!] - Table "${dbStructure.defaultDB.Users.tableName}" in "${dbStructure.defaultDB.dbName}" not found`);
+            eventLogger("MySQL", "ERROR!", `Table "${dbStructure.defaultDB.Users.tableName}" in "${dbStructure.defaultDB.dbName}" not found`, "");
             throw err;
         }
-        console.log(`(MySQL) [i] - Table "${dbStructure.defaultDB.Users.tableName}" in "${dbStructure.defaultDB.dbName}" found`);
+        eventLogger("MySQL", "i", `Table "${dbStructure.defaultDB.Users.tableName}" in "${dbStructure.defaultDB.dbName}" found`, "");
     });
 
     sql = `SELECT * FROM ${dbStructure.defaultDB.Vathults.tableName}`                                         // Check if table "Vathults" in Default DB exists
     db.query(sql, (err) => {
         if (err) {
-            console.log(`(MySQL) [ERROR!] - Table "${dbStructure.defaultDB.Vathults.tableName}" in "${dbStructure.defaultDB.dbName}" not found`);
+            eventLogger("MySQL", "ERROR!", `Table "${dbStructure.defaultDB.Vathults.tableName}" in "${dbStructure.defaultDB.dbName}" not found`, "");
             throw err;
         }
-        console.log(`(MySQL) [i] - Table "${dbStructure.defaultDB.Vathults.tableName}" in "${dbStructure.defaultDB.dbName}" found`);
+        eventLogger("MySQL", "i", `Table "${dbStructure.defaultDB.Vathults.tableName}" in "${dbStructure.defaultDB.dbName}" found`, "")
     });
 
 }
 
+function eventLogger(source, type, message, borderCharSource) {    // Log structure example : "[2023/01/28 - 12:41:53] ~(SERVER)~ [BOOT] - Message"
+    const currentDate = new Date;
+    const year = `${currentDate.getFullYear()}`;
+    const months = `${(currentDate.getMonth()+1) < 10 ? "0" : ""}${currentDate.getMonth()+1}`;
+    const date = `${currentDate.getDate() < 10 ? "0" : ""}${currentDate.getDate()}`;
+    const hours = `${currentDate.getHours() < 10 ? "0" : ""}${currentDate.getHours()}`;
+    const minutes = `${currentDate.getMinutes() < 10 ? "0" : ""}${currentDate.getMinutes()}`;
+    const seconds = `${currentDate.getSeconds() < 10 ? "0" : ""}${currentDate.getSeconds()}`;
+
+    console.log(`%c[${year}/${months}/${date} - ${hours}:${minutes}:${seconds}] %c${borderCharSource}(${source})${borderCharSource} %c[${type}] %c- %c${message}`, "color: grey", "color: yellow", "color: green", "color: grey", "color: white");
+}
 app.listen(3000);  // Voir le site sur "localhost:3000"
