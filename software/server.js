@@ -115,7 +115,7 @@ mqttApp.on('message', (topic, payload) => {
                 eventLogger("MySQL", "ERROR!", `Unable to save Vathults datas (SN: ${serialNumber})`, "");
                 console.log(err);
             } else {
-                eventLogger("MySQL", "i", "Vathults Data successfully registered (SN: ${serialNumber})", "");
+                eventLogger("MySQL", "i", `Vathults Data successfully registered (SN: ${serialNumber})`, "");
             }
         })
     }
@@ -224,7 +224,7 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs');
 })
 
-app.post('/register', checkNotAuthenticated, async (req, res) => {
+app.post('/register', checkNotAuthenticated, async (req, res) => {      // Register an user
 
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
@@ -303,7 +303,7 @@ app.post('/save-new-email', checkAuthenticated, (req, res) => {     // TODO: [A 
 
 
 /* DEVICE PART */
-app.get('/devices', checkAuthenticated, (req, res) => {
+app.get('/devices', checkAuthenticated, (req, res) => {      // Show device list
 
 
     let vathultList;
@@ -357,7 +357,7 @@ app.post('/new-device', checkAuthenticated, (req, res) => {
     // Save new device in DB. Set inputs/outputs to "null" (await device's real state)
 })
 
-app.post('/device/:deviceID/remove', checkAuthenticated, (req, res) => {  // TODO: [A programmer par rapport à l'ESP-32]
+app.post('/device/:deviceID/remove', checkAuthenticated, (req, res) => {    // Delete a device
 
     let post = { id: req.params.deviceID }
     let sql = `DELETE FROM ${dbStructure.defaultDB.Vathults.tableName} WHERE ${dbStructure.defaultDB.Vathults.id} = '${req.params.deviceID}'`;
@@ -374,7 +374,7 @@ app.post('/device/:deviceID/remove', checkAuthenticated, (req, res) => {  // TOD
     });
 })
 
-app.get('/device/:deviceID', checkAuthenticated, (req, res) => {
+app.get('/device/:deviceID', checkAuthenticated, (req, res) => {     // Show a device
 
     let vathultInfo;
     let post = { id: req.params.deviceID }
@@ -392,11 +392,89 @@ app.get('/device/:deviceID', checkAuthenticated, (req, res) => {
     });
 })
 
-app.post('/device/:deviceID/setoutput/:output-id/:state', checkAuthenticated, (req, res) => {  // TODO: [A programmer par rapport à l'ESP-32]
+app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  // TODO: Add "Switch state" buttons under every outputs
+    
+    let vathultInfo;
+    let anyChanges = false;
+    const infosToChange = ["input", "output1", "output2", "output3", "output4"];
+    let newInfo = {
+        input: null,
+        output1: null,
+        output2: null,
+        output3: null,
+        output4: null
+    };
+
+
+    let sql = `SELECT * FROM ${dbStructure.defaultDB.Vathults.tableName} WHERE ${dbStructure.defaultDB.Vathults.id} = '${req.params.deviceID}'`;
+    let post = {id: req.params.deviceID};
+
+    db.query(sql, post, async (err, results) => {
+        if (err) {
+            eventLogger("MySQL", "ERROR!", "Device info search failure", "");
+            res.redirect('/dashboard');
+            return console.log(err);
+        } else {
+            vathultInfo = results;
+            
+
+            for (i=0; i<infosToChange.length; i++) {    //  Vérifie chaque info modifiées dans le "formulaire" envoyé
+
+                if (infosToChange[i] == "input") {       //  Gestion des valeurs non booléennes (On pourra mettre un Switch a la place si y'en a plus a l'avenir)
+                    if (req.body.input != results[0].input) {
+                        newInfo.input = req.body.input;
+                        anyChanges = true;
+                    }
+                } else if (req.body[infosToChange[i]]) {        // Gestion des valeurs booléennes
+
+                    if (results[0][infosToChange[i]] == 1) {
+                        newInfo[infosToChange[i]] = 0;
+                    } else {
+                        newInfo[infosToChange[i]] = 1;
+                    }
+                    anyChanges = true;
+                }
+            };
+
+
+            if (!anyChanges) {
+                res.redirect(`/device/${req.params.deviceID}`);
+                return;
+            } 
+
+            let sql = `UPDATE ${dbStructure.defaultDB.Vathults.tableName} SET `;
+
+            let infoChanged = 0;
+            for (i=0; i< infosToChange.length; i++) {      // Création de la requête SQL
+                
+                if (newInfo[infosToChange[i]] != null) {
+
+                    if (infoChanged > 0) {
+                        sql = sql + ", ";
+                    }
+                    sql = sql + `${dbStructure.defaultDB.Vathults[infosToChange[i]]} = '${newInfo[infosToChange[i]]}'`;
+                    infoChanged++;
+                }
+            }
+        
+            db.query(sql, (err) => {
+                if (err) {
+                    eventLogger("MySQL", "ERROR!", `Unable to update Vathults datas (SN: ${results[0].serial_number})`, "");
+                    console.log(err);
+                } else {
+                    eventLogger("MySQL", "i", `Vathults Data successfully updated (SN: ${results[0].serial_number})`, "");
+                    res.redirect(`/device/${req.params.deviceID}`);
+                }
+            });
+        }
+    });
+})
+
+app.post('/device/:deviceID/setoutput/:output-id/:state', checkAuthenticated, (req, res) => {  // TODO: Add "Switch state" buttons under every outputs
     // Set device output state
 })
 
-app.post('/device/:deviceID/setsource/:source', checkAuthenticated, (req, res) => {             // TODO: [A programmer par rapport à l'ESP-32]
+app.post('/device/:deviceID/setsource/:source', checkAuthenticated, (req, res) => {             // TODO: Add a "Switch source"
     // Set device water source
 })
 

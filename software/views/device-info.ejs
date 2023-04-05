@@ -14,21 +14,38 @@
 
         <h1><%= `${vathultInfo[0].name ? vathultInfo[0].name : vathultInfo[0].serial_number}` %></h1>
 
+        <form action="/device/<%= vathultInfo[0].id %>/setoutputs" method="POST">
+            <h2>Overview</h2>
+            <p>Online since <%= vathultInfo[0].last_seen %> </p>
+            <p>* Input type : <%= vathultInfo[0].input %></p>
+            --> Set New Input type : <select class="skill" id="input" name="input">
+                <option value="rain">Rain</option>
+                <option value="tap">Tap</option>
+                <option value="none">None</option>
+            </select> 
+            <p>* flow : <%= vathultInfo[0].flow %></p>
+            <p>* Vavle 1 : <%= vathultInfo[0].output1 %></p>
+                <input type="checkbox" id="output1" name="output1">
+                <label for="output1">Switch state Valve 1</label>
+            <p>* Vavle 2 : <%= vathultInfo[0].output2 %></p>
+                <input type="checkbox" id="output2" name="output2">
+                <label for="output2">Switch state Valve 2</label>
+            <p>* Vavle 3 : <%= vathultInfo[0].output3 %></p>
+                <input type="checkbox" id="output3" name="output3">
+                <label for="output3">Switch state Valve 3</label>
+            <p>* Vavle 4 : <%= vathultInfo[0].output4 %></p>
+                <input type="checkbox" id="output4" name="output4">
+                <label for="output4">Switch state Valve 4</label>
+            <p>* Water alert : <%= vathultInfo[0].water_alert %></p>
+            <p># Messages : <%= vathultInfo[0].messages %></p>
+            <p># Wi-Fi Strength : <%= vathultInfo[0].wifi_strength %></p>
+            <p># Wi-Fi SSID : <%= vathultInfo[0].wifi_ssid %></p>
+            <p>[i] Serial Number : <%= vathultInfo[0].serial_number %></p>
+            <br>
+            <button type="submit">Save chages</button>
+        </form>
 
-        <h2>Overview</h2>
-        <p>Online since <%= vathultInfo[0].last_seen %> </p>
-        <p>* Input type : <%= vathultInfo[0].input %></p>
-        <p>* flow : <%= vathultInfo[0].flow %></p>
-        <p>* Vavle 1 : <%= vathultInfo[0].output1 %></p>
-        <p>* Vavle 2 : <%= vathultInfo[0].output2 %></p>
-        <p>* Vavle 3 : <%= vathultInfo[0].output3 %></p>
-        <p>* Vavle 4 : <%= vathultInfo[0].output4 %></p>
-        <p>* Water alert : <%= vathultInfo[0].water_alert %></p>
-        <p># Messages : <%= vathultInfo[0].messages %></p>
-        <p># Wi-Fi Strength : <%= vathultInfo[0].wifi_strength %></p>
-        <p># Wi-Fi SSID : <%= vathultInfo[0].wifi_ssid %></p>
-        <p>[i] Serial Number : <%= vathultInfo[0].serial_number %></p>
-
+        <br><br>
 
         <form action="/devices" method="GET">
 
