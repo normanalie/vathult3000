@@ -205,14 +205,14 @@ app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render('login.ejs');
 })
 
-app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
+app.post('/login', checkNotAuthenticated, passport.authenticate('local', {   // Log in an user
     successRedirect: '/dashboard',
     failureRedirect: '/login',
     failureFlash: true
 }))
 
 
-app.delete('/logout', (req, res, next) => {
+app.delete('/logout', (req, res, next) => {  // Logout an user
     req.logOut(err => {
         if (err) { return next(err) }
     });
@@ -326,7 +326,7 @@ app.get('/new-device', checkAuthenticated, (req, res) => {
     res.render('new-device.ejs');
 })
 
-app.post('/new-device', checkAuthenticated, (req, res) => {
+app.post('/new-device', checkAuthenticated, (req, res) => {    // Add a new device in the DB
 
     try {
 
@@ -392,7 +392,7 @@ app.get('/device/:deviceID', checkAuthenticated, (req, res) => {     // Show a d
     });
 })
 
-app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  // TODO: Add "Switch state" buttons under every outputs
+app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  // Update device's values
     
     let vathultInfo;
     let anyChanges = false;
@@ -418,14 +418,14 @@ app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  /
             vathultInfo = results;
             
 
-            for (i=0; i<infosToChange.length; i++) {    //  Vérifie chaque info modifiées dans le "formulaire" envoyé
+            for (i=0; i<infosToChange.length; i++) {     //  Check info sent by the form
 
-                if (infosToChange[i] == "input") {       //  Gestion des valeurs non booléennes (On pourra mettre un Switch a la place si y'en a plus a l'avenir)
+                if (infosToChange[i] == "input") {       //  Non boolean values manager (On pourra mettre un Switch a la place si y'en a plus a l'avenir)
                     if (req.body.input != results[0].input) {
                         newInfo.input = req.body.input;
                         anyChanges = true;
                     }
-                } else if (req.body[infosToChange[i]]) {        // Gestion des valeurs booléennes
+                } else if (req.body[infosToChange[i]]) {        // Boolean values manager
 
                     if (results[0][infosToChange[i]] == 1) {
                         newInfo[infosToChange[i]] = 0;
@@ -445,7 +445,7 @@ app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  /
             let sql = `UPDATE ${dbStructure.defaultDB.Vathults.tableName} SET `;
 
             let infoChanged = 0;
-            for (i=0; i< infosToChange.length; i++) {      // Création de la requête SQL
+            for (i=0; i< infosToChange.length; i++) {      // SQL query creation
                 
                 if (newInfo[infosToChange[i]] != null) {
 
@@ -470,15 +470,6 @@ app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  /
     });
 })
 
-app.post('/device/:deviceID/setoutput/:output-id/:state', checkAuthenticated, (req, res) => {  // TODO: Add "Switch state" buttons under every outputs
-    // Set device output state
-})
-
-app.post('/device/:deviceID/setsource/:source', checkAuthenticated, (req, res) => {             // TODO: Add a "Switch source"
-    // Set device water source
-})
-
-
 
 /* Erro 404 handler */
 app.use((req, res) => {
@@ -489,7 +480,7 @@ app.use((req, res) => {
 
 
 
-function checkAuthenticated(req, res, next) {
+function checkAuthenticated(req, res, next) {   // Check if an user is logged
     if (req.isAuthenticated()) {
         return next();
     }
@@ -497,7 +488,7 @@ function checkAuthenticated(req, res, next) {
     res.redirect('/login');
 }
 
-function checkNotAuthenticated(req, res, next) {
+function checkNotAuthenticated(req, res, next) {  // Check if an user isn't logged
     if (req.isAuthenticated()) {
         return res.redirect('/');
     }
@@ -505,7 +496,7 @@ function checkNotAuthenticated(req, res, next) {
     next();
 }
 
-function defaultDBCheck() {
+function defaultDBCheck() {   // Check if the DB "exists"
     let sql = `USE ${dbStructure.defaultDB.dbName}`;
     db.query(sql, (err) => {
         if (err) {
