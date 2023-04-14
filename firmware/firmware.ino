@@ -22,6 +22,9 @@ For informations about controll see "software" folder.
 
 /* HARDWARE CONFIG */
 #define FLOW_PIN 4
+#define INFILTRATION_PIN 3
+#define ACTUATORS_ADDR 0b0100000
+
 
 /* MQTT Config */
 #include "mqtt_conf.h"
@@ -35,7 +38,6 @@ For informations about controll see "software" folder.
 #include <WiFiManager.h>
 #include <PubSubClient.h>
 #include "flags.h"
-#include "interface.h"
 #include "actuators.h"
 #include "flows.h"
 
@@ -44,6 +46,7 @@ For informations about controll see "software" folder.
   #define SCL 6
 #endif
 
+
 // WiFi
 WiFiClient espClient;
 WiFiManager wm;
@@ -51,22 +54,22 @@ WiFiManager wm;
 PubSubClient mqtt_client(espClient);
 String mqtt_client_id = "vathult3000_";
 
-Screen screen = Screen(SDA, SCL, states);
-Keyboard keyboard = Keyboard(0b0100010, SDA, SCL, -1);
-Actuators actuators = Actuators(0b0100000, SDA, SCL);
+Actuators actuators = Actuators(ACTUATORS_ADDR, SDA, SCL);
 Flows flow = Flows(FLOW_PIN);
 
 
 void setup_io();
 void setup_wifi();
+void setup_captive_portal();
 void setup_mqtt();
 void index_html();
-void menu_navigate();
 void mqtt_reconnect();
 void mqtt_callback(char* topic, byte* payload, unsigned int length);
 
 void setup(){
   Serial.begin(9600);
+  delay(1500);
+  Serial.println("=========== VATHULT3000 ==========");
   setup_io();
   setup_wifi();
   setup_mqtt();
@@ -102,54 +105,37 @@ void loop(){
     // Update flow sensor
     states[STATE_FLOW] = flow.read_pin(FLOW_PIN, 100);
     // Update infiltration sensor
-    Serial.println(analogRead(3));
+    states[STATE_INFILTRATION] = analogRead(INFILTRATION_PIN);
   }
-  screen.update();
-  keyboard.update();
-  menu_navigate();
 }
 
 void setup_io(){
-  screen.begin();
-  if(!keyboard.begin()) screen.error = "Keyboard not found";
-  if(!actuators.begin()) screen.error = "Output not found";
+  actuators.begin();
   return;
 }
 
 void setup_wifi(){
   WiFi.mode(WIFI_STA);  // For sanity
-  wm.setConfigPortalBlocking(false); 
-  wm.setAPStaticIPConfig(IPAddress(192,168,1,1), IPAddress(192,168,1,1), IPAddress(255,255,255,0));  // Capttive portal IP
-  // UI
-  wm.setTitle("VATHULT3000");
-  wm.setClass("invert");  // Captive-portal dark theme
-  const char* wm_menu[] = {"wifi","sep","restart","exit"};  // Captive portal menu buttons (sep = separator)
-  wm.setMenu(wm_menu, 4);
-  // Start
-  states[STATE_WIFI] = wm.autoConnect("VATHULT3000_Setup");
-  return;
+  setup_captive_portal();
+}
+
+void setup_captive_portal(){
+    wm.setConfigPortalBlocking(false); 
+    wm.setAPStaticIPConfig(IPAddress(192,168,1,1), IPAddress(192,168,1,1), IPAddress(255,255,255,0));  // Capttive portal IP
+    // UI
+    wm.setTitle("VATHULT3000");
+    wm.setClass("invert");  // Captive-portal dark theme
+    const char* wm_menu[] = {"wifi","sep","restart","exit"};  // Captive portal menu buttons (sep = separator)
+    wm.setMenu(wm_menu, 4);
+    // Start
+    states[STATE_WIFI] = wm.autoConnect("VATHULT3000_Setup");
+    return;
 }
 
 void setup_mqtt(){
   mqtt_client_id += String(random(0xffff), HEX);
   mqtt_client.setServer(MQTT_SERVER, MQTT_PORT);
   mqtt_client.setCallback(mqtt_callback);
-  return;
-}
-
-
-void menu_navigate(){
-  static unsigned long t = millis();
-  if(millis()-t > 150){
-    if(keyboard.isOnlyPressed(BTN_LEFT)){
-      screen.nav_left();
-    }else if(keyboard.isOnlyPressed(BTN_RIGHT)){
-      screen.nav_right();
-    }else if(keyboard.isOnlyPressed(BTN_CENTER)){
-      screen.nav_center();
-    }
-    t = millis();
-  }
   return;
 }
 
@@ -163,7 +149,6 @@ void mqtt_reconnect(){
     } else {
       Serial.println("MQTT Failed to connect");
       Serial.println(mqtt_client.state());
-      screen.error = "MQTT Error";
     }
   }
   return;

@@ -6,6 +6,8 @@
 //#include <PCF8574.h>
 #include "flags.h"
 
+#define CAIBRATION_FACTOR 4.5
+
 void IRAM_ATTR pulse_ISR();
 
 class Flows{
