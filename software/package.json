@@ -13,14 +13,17 @@
     "mqtt": "^4.3.7",
     "mysql": "^2.18.1",
     "passport": "^0.6.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "tailwindcss": "^3.3.1"
   },
   "devDependencies": {
+    "concurrently": "^8.0.1",
     "dotenv": "^16.0.3",
     "nodemon": "^2.0.20"
   },
   "scripts": {
-    "devStart": "nodemon server.js"
+    "devStart": "concurrently \"nodemon server.js\" \"npm run css\" ",
+    "css": "npx tailwindcss -i ./public/styles/tailwind.css -o ./public/styles/style.css --watch"
   },
   "author": "",
   "license": "ISC"

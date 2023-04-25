@@ -15,11 +15,18 @@ const methodOverride = require('method-override');
 const mysql = require('mysql');
 const mysqlLogID = require('./mysql-log-id.json');
 const dbStructure = require('./db-structure.json');
+const path = require("path");
+
 
 const mqtt = require('mqtt');
 const mqttLogID = require('./mqtt-log-id.json');
 
 const LocalStrategy = require('passport-local').Strategy;
+
+// => Here we expose the views so it can be rendered.
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static("public"));
+app.set('view engine', 'ejs');
 
 
 
@@ -472,11 +479,12 @@ app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  /
 
 
 /* Erro 404 handler */
+/*
 app.use((req, res) => {
     res.status(404);
     res.render('error-404.ejs');
     return;
-})
+})*/
 
 
 
@@ -537,4 +545,7 @@ function eventLogger(source, type, message, borderCharSource) {    // Log struct
 
     console.log(`[${year}/${months}/${date} - ${hours}:${minutes}:${seconds}] ${borderCharSource}(${source})${borderCharSource} [${type}] - ${message}`);
 }
+
+
+
 app.listen(3000);  // Voir le site sur "localhost:3000"
