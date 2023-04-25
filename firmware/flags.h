@@ -16,6 +16,9 @@
 #define STATE_WIFI          7 
 #define STATE_INFILTRATION  8
 
+#define ERRORS_LEN 16
+
 extern int16_t states[16];
+extern String errors[ERRORS_LEN];
 
 #endif

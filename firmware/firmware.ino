@@ -25,18 +25,8 @@ For informations about controll see "software" folder.
 #define INFILTRATION_PIN 3
 #define ACTUATORS_ADDR 0b0100000
 
-
-/* MQTT Config */
-#include "mqtt_conf.h"
-/*
-#define MQTT_SERVER   "<server address>"
-#define MQTT_PORT     <port>
-#define MQTT_USER     "<user>"
-#define MQTT_PASSWORD "<password>"
-*/
-
 #include <WiFiManager.h>
-#include <PubSubClient.h>
+#include "mqtt.h"
 #include "flags.h"
 #include "actuators.h"
 #include "flows.h"
@@ -50,9 +40,8 @@ For informations about controll see "software" folder.
 // WiFi
 WiFiClient espClient;
 WiFiManager wm;
-// MQTT
-PubSubClient mqtt_client(espClient);
-String mqtt_client_id = "vathult3000_";
+
+MQTT mqtt_client = MQTT(espClient, "test");
 
 Actuators actuators = Actuators(ACTUATORS_ADDR, SDA, SCL);
 Flows flow = Flows(FLOW_PIN);
@@ -61,10 +50,9 @@ Flows flow = Flows(FLOW_PIN);
 void setup_io();
 void setup_wifi();
 void setup_captive_portal();
-void setup_mqtt();
 void index_html();
-void mqtt_reconnect();
-void mqtt_callback(char* topic, byte* payload, unsigned int length);
+
+
 
 void setup(){
   Serial.begin(9600);
@@ -72,7 +60,7 @@ void setup(){
   Serial.println("=========== VATHULT3000 ==========");
   setup_io();
   setup_wifi();
-  setup_mqtt();
+  mqtt_client.setup();
 }
 
 void loop(){
@@ -88,11 +76,7 @@ void loop(){
     }
     // Update MQTT
     if(states[STATE_WIFI]){
-      if(!mqtt_client.connected()){
-          mqtt_reconnect();
-      } else {
-        mqtt_client.loop();
-      }
+      mqtt_client.reconnect();
     }
     // Update Pump status
     if(states[STATE_SOURCE] == SOURCE_TAP){
@@ -131,37 +115,3 @@ void setup_captive_portal(){
     states[STATE_WIFI] = wm.autoConnect("VATHULT3000_Setup");
     return;
 }
-
-void setup_mqtt(){
-  mqtt_client_id += String(random(0xffff), HEX);
-  mqtt_client.setServer(MQTT_SERVER, MQTT_PORT);
-  mqtt_client.setCallback(mqtt_callback);
-  return;
-}
-
-
-void mqtt_reconnect(){
-  if(!mqtt_client.connected()){
-    if(mqtt_client.connect(mqtt_client_id.c_str(), MQTT_USER, MQTT_PASSWORD)){  // Attempt to connect
-      Serial.println("MQTT Connected");
-      mqtt_client.publish("/nodejs/mqtt/3/", "Hello from ESP");
-      mqtt_client.subscribe("/nodejs/mqtt/3/");
-    } else {
-      Serial.println("MQTT Failed to connect");
-      Serial.println(mqtt_client.state());
-    }
-  }
-  return;
-}
-
-void mqtt_callback(char* topic, byte* payload, unsigned int length){
-  Serial.print("MQTT Message arrived on [");
-  Serial.print(topic);
-  Serial.println("]");
-  for(int c=0; c<length; c++){
-    Serial.print((char)payload[c]);
-  }
-  Serial.println();
-  return;
-}
-
