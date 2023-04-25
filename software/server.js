@@ -421,7 +421,7 @@ app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  /
             for (i=0; i<infosToChange.length; i++) {     //  Check info sent by the form
 
                 if (infosToChange[i] == "input") {       //  Non boolean values manager (On pourra mettre un Switch a la place si y'en a plus a l'avenir)
-                    if (req.body.input != results[0].input) {
+                    if (req.body.input != results[0].input && req.body.input != null) {
                         newInfo.input = req.body.input;
                         anyChanges = true;
                     }

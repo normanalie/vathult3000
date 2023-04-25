@@ -20,6 +20,7 @@
             <p>* Input type : <%= `${vathultInfo[0].input === null ? "Pending..." : vathultInfo[0].input}` %></p>
             <% if  (vathultInfo[0].input) { %>
                 --> Set New Input type : <select class="skill" id="input" name="input">
+                    <option value="none" disabled selected hidden>Select a value</option>
                     <option value="rain">Rain</option>
                     <option value="tap">Tap</option>
                     <option value="none">None</option>
