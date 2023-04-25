@@ -239,7 +239,7 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {      // Regis
                       '${req.body.name}',
                       '${hashedPassword}',
                       '0',
-                      'abcd1234'`;
+                      '${generateRandomString(30)}'`;
         let sql = `INSERT INTO ${dbStructure.defaultDB.Users.tableName} (${columns}) VALUES (${values})`;
         db.query(sql, (err) => {
             if (err) {
@@ -248,7 +248,7 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {      // Regis
                 res.redirect('/register');
             } else {
                 eventLogger("MySQL", "i", `New user "${req.body.name}" successfully registered`, "");
-                res.redirect('/login');
+                res.render('confirm-user.ejs', { mail: req.body.email });
             }
         })
 
@@ -257,12 +257,51 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {      // Regis
     }
 })
 
+app.get('/confirm-user', checkNotAuthenticated, (req, res) => {
+    res.render('confirm-user-without-mail.ejs');
+})
+
 app.post('/send-confirmation-mail', checkNotAuthenticated, (req, res) => {  // TODO: [A programmer]
     // Send a confirmation mail
 })
 
-app.post('/validate/:user-id/:uid', (req, res) => {      // TODO: [A programmer]
+app.post('/validate/:userID/:validateID', (req, res) => {      // TODO: [A programmer]
     // Set user's "active" state to "true" in DB
+
+    let post = { id: req.params.userID }
+    let validateID = { vid : req.params.validateID }
+    let sql = `SELECT * FROM ${dbStructure.defaultDB.Users.tableName} WHERE ${dbStructure.defaultDB.Users.id} = '${req.params.userID}'`;
+
+    db.query(sql, post, async (err, results) => {
+        if (err) {
+            eventLogger("MySQL", "ERROR!", "User search failure", "");
+            res.redirect('/');
+            return console.log(err);
+        } else {
+            const userInfo = results;
+
+            if (userInfo[0].activate_uid == validateID.vid) {
+
+                sql = `UPDATE ${dbStructure.defaultDB.Users.tableName} SET ${dbStructure.defaultDB.Users.active} = '1'
+                       WHERE ${dbStructure.defaultDB.Users.id} = '${req.params.userID}'`;
+
+                db.query(sql, async (err, results) => {
+
+                    if (err) {
+                        eventLogger("MySQL", "ERROR!", "User activate state set failure", "");
+                        res.redirect('/');
+                        return console.log(err);
+                    } else {
+                        res.redirect('/login');   
+                    }
+                });
+
+            } else {
+                eventLogger("MySQL", "ERROR!", "The Validate ID sent and owned don't match", "");
+                res.redirect('/');
+            }
+        }
+    });
 })
 
 app.get('/dashboard', checkAuthenticated, (req, res) => {
@@ -456,6 +495,8 @@ app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  /
                     infoChanged++;
                 }
             }
+
+            sql = sql + ` WHERE ${dbStructure.defaultDB.Vathults.id} = '${req.params.deviceID}'`
         
             db.query(sql, (err) => {
                 if (err) {
@@ -486,6 +527,14 @@ function checkAuthenticated(req, res, next) {   // Check if an user is logged
     }
 
     res.redirect('/login');
+}
+
+function checkVerifiedAccount(req, res, next) {
+    if (req.user.active == 1) {
+        return next();
+    }
+
+    res.redirect('/confirm-user');
 }
 
 function checkNotAuthenticated(req, res, next) {  // Check if an user isn't logged
@@ -537,4 +586,17 @@ function eventLogger(source, type, message, borderCharSource) {    // Log struct
 
     console.log(`[${year}/${months}/${date} - ${hours}:${minutes}:${seconds}] ${borderCharSource}(${source})${borderCharSource} [${type}] - ${message}`);
 }
+
+function generateRandomString(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
+};
+
 app.listen(3000);  // Voir le site sur "localhost:3000"
