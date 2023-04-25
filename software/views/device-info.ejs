@@ -16,7 +16,7 @@
 
         <form action="/device/<%= vathultInfo[0].id %>/setoutputs" method="POST">
             <h2>Overview</h2>
-            <p>Online since <%= vathultInfo[0].last_seen %> </p>
+            <p>Online since : <%= `${vathultInfo[0].last_seen === null ? "Never been online before" : vathultInfo[0].last_seen}` %></p>
             <p>* Input type : <%= `${vathultInfo[0].input === null ? "Pending..." : vathultInfo[0].input}` %></p>
             <% if  (vathultInfo[0].input) { %>
                 --> Set New Input type : <select class="skill" id="input" name="input">
