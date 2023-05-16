@@ -21,8 +21,11 @@ const dbStructure = require('./src/misc/db-structure.json');
 
 const mqtt = require('mqtt');
 const mqttLogID = require('./mqtt-log-id.json');
+const mqttConnect = require('./src/mqtt/events/connect');
+const mqttMessage = require('./src/mqtt/events/message');
 
 
+/* MySQL */
 
 const db = mysql.createConnection({        // Init MySQL connection
     host: mysqlLogID.devUser.host,
@@ -40,7 +43,7 @@ db.connect(err => {                        // Connect to MySQL
 })
 
 
-defaultDBCheck();                          // Select and check default website DB 
+defaultDBCheck();        // Select and check default website DB 
 
 
 /* MQTT */
@@ -61,74 +64,17 @@ const mqttApp = mqtt.connect(mqttConnectURL, {
     reconnectPeriod: mqttLogID.defaultUser.reconnectPeriod,
 })
 
-let mqttTopicBase = 'vathult3000';
 
-mqttApp.on('connect', () => {
+mqttConnect(mqttApp);
 
-    eventLogger("MQTT", "i", "MQTT connection established", "");
-
-    const mqttTopic = `${mqttTopicBase}/+`
-
-    mqttApp.subscribe([mqttTopic], (err) => {
-
-        if (err) {
-            eventLogger("MQTT", "ERROR!", `Failed to subscribe to topic(s) [${mqttTopic}]`, "");
-            throw err;
-        }
-        eventLogger("MQTT", "i", `Subscribed to topic [${mqttTopic}]`, "");
-    });
-
-    mqttApp.publish(`${mqttTopicBase}/TEST`, '(Test) MQTT Boot Message', { qos: 0, retain: false }, (error) => {  //Test message
-        if (error) {
-            eventLogger("MQTT", "ERROR!", `Failed to send test to topic(s) [${mqttTopic}]`, "");
-            console.error(error)
-        }
-    });
-})
-
-mqttApp.on('message', (topic, payload) => {
-
-    let message = payload.toString();
-    eventLogger("MQTT", "<--", `[${topic}] ${message}`, "");
-
-    const devicetype = topic.split('/')[0];
-
-    if (devicetype == mqttTopicBase && topic != `${mqttTopicBase}/TEST`) {
-        const serialNumber = topic.slice(12);
-        message = JSON.parse(message);
-
-        
-        let sql = `UPDATE ${dbStructure.defaultDB.Vathults.tableName}
-                   SET ${dbStructure.defaultDB.Vathults.flow} = '${message.flow}',
-                       ${dbStructure.defaultDB.Vathults.waterAlert} = '${message.water_alert}',
-                       ${dbStructure.defaultDB.Vathults.input} = '${message.input}',
-                       ${dbStructure.defaultDB.Vathults.output1} = '${message.output1}',
-                       ${dbStructure.defaultDB.Vathults.output2} = '${message.output2}',
-                       ${dbStructure.defaultDB.Vathults.output3} = '${message.output3}',
-                       ${dbStructure.defaultDB.Vathults.output4} = '${message.output4}',
-                       ${dbStructure.defaultDB.Vathults.wifiStrength} = '${message.wifi_strength}',
-                       ${dbStructure.defaultDB.Vathults.wifiSSID} = '${message.wifi_ssid}',
-                       ${dbStructure.defaultDB.Vathults.messages} = '${JSON.stringify(message.messages)}'
-                   WHERE ${dbStructure.defaultDB.Vathults.serialNumber} = '${serialNumber}'`;
-        
-        db.query(sql, (err) => {
-            if (err) {
-                eventLogger("MySQL", "ERROR!", `Unable to save Vathults datas (SN: ${serialNumber})`, "");
-                console.log(err);
-            } else {
-                eventLogger("MySQL", "i", `Vathults Data successfully registered (SN: ${serialNumber})`, "");
-            }
-        })
-    }
-})
-
+mqttMessage(mqttApp, db);
 
 // Passport.JS
 
 initPassport(passport, db);
 
-// [END] Passport.JS
 
+/* Express.js */
 
 app.set('view-engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
@@ -145,9 +91,7 @@ app.use(methodOverride('_method'));
 
 eventLogger("SERVER", "BOOT", "Server started", "~");
 
-
-
-
+/*** API ***/
 
 /* HOME PAGE */
 app.get('/', (req, res) => {
