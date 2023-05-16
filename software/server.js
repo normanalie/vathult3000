@@ -7,19 +7,20 @@ if (process.env.NODE_ENV !== 'production') {   // If dev mode enabled, use ".env
 
 const express = require('express');
 const app = express();
-const bcrypt = require('bcrypt');
-const passport = require('passport');
 const flash = require('express-flash');
 const session = require('express-session');
 const methodOverride = require('method-override');
+
+const bcrypt = require('bcrypt');
+const passport = require('passport');
+const initPassport = require('./src/utils/initPassport');
+
 const mysql = require('mysql');
 const mysqlLogID = require('./mysql-log-id.json');
-const dbStructure = require('./db-structure.json');
+const dbStructure = require('./src/misc/db-structure.json');
 
 const mqtt = require('mqtt');
 const mqttLogID = require('./mqtt-log-id.json');
-
-const LocalStrategy = require('passport-local').Strategy;
 
 
 
@@ -124,52 +125,7 @@ mqttApp.on('message', (topic, payload) => {
 
 // Passport.JS
 
-const authentificateUser = async (email, password, done) => {
-    let user;
-    let post = { mail: email }
-    let sql = `SELECT * FROM ${dbStructure.defaultDB.Users.tableName} WHERE ${dbStructure.defaultDB.Users.mail} = '${email}'`;
-    db.query(sql, post, async (err, results) => {
-        if (err) {
-            eventLogger("MySQL", "ERROR!", "Email search failure", "");
-            return console.log(err);
-        } else if (results.length == 0) {
-            return done(null, false, { message: 'No user with that email' });
-        }
-
-        user = { id: results[0].id, name: results[0].name, passwordHash: results[0].password_hash };
-
-        try {
-
-            if (await bcrypt.compare(password, user.passwordHash)) {
-                return done(null, user);
-            } else {
-                return done(null, false, { message: 'Incorrect password' });
-            }
-
-        } catch (e) {
-            return done(e);
-        }
-    });
-}
-
-passport.use(new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, authentificateUser));
-
-passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser((id, done) => {
-
-    let post = { id: id }
-    let sql = `SELECT * FROM ${dbStructure.defaultDB.Users.tableName} WHERE ${dbStructure.defaultDB.Users.id} = '${id}'`;
-    db.query(sql, post, async (err, results) => {
-        if (err) {
-            eventLogger("MySQL", "ERROR!", "ID search failure");
-            return console.log(err);
-        } else if (results.length == 0) {
-            return done(null, false);
-        }
-        return done(null, results[0]);
-    });
-});
-
+initPassport(passport, db);
 
 // [END] Passport.JS
 
