@@ -1,12 +1,3 @@
-// Misc
-const eventLogger = require('./src/misc/eventLogger');
-
-if (process.env.NODE_ENV !== 'production') {   // If dev mode enabled, use ".env" file for environment variables and XAMPP for fake MySQL server
-    require('dotenv').config();
-    eventLogger("SERVER", "WARNING!", "Dev Mode enabled!", "~");
-    eventLogger("SERVER", "Dev # i", "Server running on http://localhost:3000", "~")
-}
-
 // Express.js
 const express = require('express');
 const app = express();
@@ -29,7 +20,14 @@ const mqttConnect = require('./src/mqtt/events/connect');
 const mqttMessage = require('./src/mqtt/events/message');
 // Misc.
 const defaultDBCheck = require('./src/utils/defaultDBCheck');
+const eventLogger = require('./src/misc/eventLogger');
 
+
+if (process.env.NODE_ENV !== 'production') {   // If dev mode enabled, use ".env" file for environment variables and XAMPP for MySQL server
+    require('dotenv').config();
+    eventLogger("SERVER", "WARNING!", "Dev Mode enabled!", "~");
+    eventLogger("SERVER", "Dev # i", "Server running on http://localhost:3000", "~")
+}
 
 /* MySQL */
 
