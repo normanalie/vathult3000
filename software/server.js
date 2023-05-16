@@ -29,7 +29,7 @@ app.use(express.static("public"));
 app.set('view engine', 'ejs');
 
 
-
+/*
 const db = mysql.createConnection({        // Init MySQL connection
     host: mysqlLogID.devUser.host,
     user: mysqlLogID.devUser.user,
@@ -48,7 +48,7 @@ db.connect(err => {                        // Connect to MySQL
 
 defaultDBCheck();                          // Select and check default website DB 
 
-
+*/
 /* MQTT */
 
 const mqttHost = mqttLogID.defaultUser.host
