@@ -1,28 +1,31 @@
+// Misc
+const eventLogger = require('./src/misc/eventLogger');
+
 if (process.env.NODE_ENV !== 'production') {   // If dev mode enabled, use ".env" file for environment variables and XAMPP for fake MySQL server
     require('dotenv').config();
     eventLogger("SERVER", "WARNING!", "Dev Mode enabled!", "~");
     eventLogger("SERVER", "Dev # i", "Server running on http://localhost:3000", "~")
 }
 
-
+// Express.js
 const express = require('express');
 const app = express();
-const flash = require('express-flash');
-const session = require('express-session');
-const methodOverride = require('method-override');
-
+const initExpress = require('./src/express/utils/initExpress');
+// Passport.js & encryption
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const initPassport = require('./src/utils/initPassport');
-
+// MySQL & DB
 const mysql = require('mysql');
 const mysqlLogID = require('./mysql-log-id.json');
 const dbStructure = require('./src/misc/db-structure.json');
-
+// MQTT
 const mqtt = require('mqtt');
 const mqttLogID = require('./mqtt-log-id.json');
 const mqttConnect = require('./src/mqtt/events/connect');
 const mqttMessage = require('./src/mqtt/events/message');
+// Misc.
+const defaultDBCheck = require('./src/utils/defaultDBCheck');
 
 
 /* MySQL */
@@ -43,7 +46,7 @@ db.connect(err => {                        // Connect to MySQL
 })
 
 
-defaultDBCheck();        // Select and check default website DB 
+defaultDBCheck(db);        // Select and check default website DB 
 
 
 /* MQTT */
@@ -71,22 +74,12 @@ mqttMessage(mqttApp, db);
 
 // Passport.JS
 
-initPassport(passport, db);
+initPassport(db);
 
 
 /* Express.js */
 
-app.set('view-engine', 'ejs');
-app.use(express.urlencoded({ extended: false }));
-app.use(flash());
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false
-}))
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(methodOverride('_method'));
+initExpress();
 
 
 eventLogger("SERVER", "BOOT", "Server started", "~");
@@ -420,7 +413,6 @@ app.use((req, res) => {
 })
 
 
-
 function checkAuthenticated(req, res, next) {   // Check if an user is logged
     if (req.isAuthenticated()) {
         return next();
@@ -429,13 +421,6 @@ function checkAuthenticated(req, res, next) {   // Check if an user is logged
     res.redirect('/login');
 }
 
-function checkVerifiedAccount(req, res, next) {
-    if (req.user.active == 1) {
-        return next();
-    }
-
-    res.redirect('/confirm-user');
-}
 
 function checkNotAuthenticated(req, res, next) {  // Check if an user isn't logged
     if (req.isAuthenticated()) {
@@ -445,47 +430,6 @@ function checkNotAuthenticated(req, res, next) {  // Check if an user isn't logg
     next();
 }
 
-function defaultDBCheck() {   // Check if the DB "exists"
-    let sql = `USE ${dbStructure.defaultDB.dbName}`;
-    db.query(sql, (err) => {
-        if (err) {
-            eventLogger("MySQL", "ERROR!", `Default database "${dbStructure.defaultDB.dbName}" not found`, "");     // Check if Default DB exists
-            throw err;
-        }
-        eventLogger("MySQL", "i", `Default database "${dbStructure.defaultDB.dbName}" selected`, "");
-    });
-
-    sql = `SELECT * FROM ${dbStructure.defaultDB.Users.tableName}`                                             // Check if table "Users" in Default DB exists
-    db.query(sql, (err) => {
-        if (err) {
-            eventLogger("MySQL", "ERROR!", `Table "${dbStructure.defaultDB.Users.tableName}" in "${dbStructure.defaultDB.dbName}" not found`, "");
-            throw err;
-        }
-        eventLogger("MySQL", "i", `Table "${dbStructure.defaultDB.Users.tableName}" in "${dbStructure.defaultDB.dbName}" found`, "");
-    });
-
-    sql = `SELECT * FROM ${dbStructure.defaultDB.Vathults.tableName}`                                         // Check if table "Vathults" in Default DB exists
-    db.query(sql, (err) => {
-        if (err) {
-            eventLogger("MySQL", "ERROR!", `Table "${dbStructure.defaultDB.Vathults.tableName}" in "${dbStructure.defaultDB.dbName}" not found`, "");
-            throw err;
-        }
-        eventLogger("MySQL", "i", `Table "${dbStructure.defaultDB.Vathults.tableName}" in "${dbStructure.defaultDB.dbName}" found`, "")
-    });
-
-}
-
-function eventLogger(source, type, message, borderCharSource) {    // Log structure example : "[2023/01/28 - 12:41:53] ~(Source)~ [Type] - Message"
-    const currentDate = new Date;
-    const year = `${currentDate.getFullYear()}`;
-    const months = `${(currentDate.getMonth()+1) < 10 ? "0" : ""}${currentDate.getMonth()+1}`;
-    const date = `${currentDate.getDate() < 10 ? "0" : ""}${currentDate.getDate()}`;
-    const hours = `${currentDate.getHours() < 10 ? "0" : ""}${currentDate.getHours()}`;
-    const minutes = `${currentDate.getMinutes() < 10 ? "0" : ""}${currentDate.getMinutes()}`;
-    const seconds = `${currentDate.getSeconds() < 10 ? "0" : ""}${currentDate.getSeconds()}`;
-
-    console.log(`[${year}/${months}/${date} - ${hours}:${minutes}:${seconds}] ${borderCharSource}(${source})${borderCharSource} [${type}] - ${message}`);
-}
 
 function generateRandomString(length) {
     let result = '';

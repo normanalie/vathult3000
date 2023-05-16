@@ -1,14 +1,15 @@
-/* 
- *  - Passport.js configuration 
+/*
+ *  - Initialize Passport.js
  */
 
 const eventLogger = require('../misc/eventLogger');
 const dbStructure = require('../misc/db-structure.json');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
+const passport = require('passport');
 
 
-module.exports = (passport, db) => {
+module.exports = (db) => {
     const authentificateUser = async (email, password, done) => {
         let user;
         let post = { mail: email }
