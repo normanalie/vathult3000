@@ -10,6 +10,9 @@ if (process.env.NODE_ENV !== 'production') {   // If dev mode enabled, use ".env
 // Express.js
 const express = require('express');
 const app = express();
+const flash = require('express-flash');
+const session = require('express-session');
+const methodOverride = require('method-override');
 const initExpress = require('./src/express/utils/initExpress');
 // Passport.js & encryption
 const bcrypt = require('bcrypt');
@@ -79,7 +82,7 @@ initPassport(db);
 
 /* Express.js */
 
-initExpress();
+initExpress(app, flash, session, methodOverride);
 
 
 eventLogger("SERVER", "BOOT", "Server started", "~");

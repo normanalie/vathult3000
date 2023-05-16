@@ -3,6 +3,7 @@
  */
 
 const dbStructure = require('../misc/db-structure.json');
+const eventLogger = require('../misc/eventLogger');
 
 module.exports = (db) => {
 

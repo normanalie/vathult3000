@@ -5,13 +5,9 @@
 
 require('dotenv').config();
 const express = require('express');
-const app = express();
-const flash = require('express-flash');
-const session = require('express-session');
-const methodOverride = require('method-override');
 const passport = require('passport');
 
-module.exports = () => {
+module.exports = (app, flash, session, methodOverride) => {
 
     app.set('view-engine', 'ejs');
     app.use(express.urlencoded({ extended: false }));
