@@ -13,13 +13,13 @@ const initPassport = require('./src/utils/initPassport');
 const mysql = require('mysql');
 const mysqlLogID = require('./mysql-log-id.json');
 const dbStructure = require('./src/misc/db-structure.json');
+const initDB = require('./src/utils/initDB');
 // MQTT
 const mqtt = require('mqtt');
 const mqttLogID = require('./mqtt-log-id.json');
 const mqttConnect = require('./src/mqtt/events/connect');
 const mqttMessage = require('./src/mqtt/events/message');
 // Misc.
-const defaultDBCheck = require('./src/utils/defaultDBCheck');
 const eventLogger = require('./src/misc/eventLogger');
 
 
@@ -46,9 +46,7 @@ db.connect(err => {                        // Connect to MySQL
     eventLogger("MySQL", "i", "MySQL connection established", "");
 })
 
-
-defaultDBCheck(db);        // Select and check default website DB 
-
+initDB(db)                 // Create and initialize DB if necessary 
 
 /* MQTT */
 
