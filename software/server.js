@@ -403,7 +403,6 @@ app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  /
                             
                             if (newInfo.input == null) {
                                 newInfo.input = results[0].input
-                                console.log(newInfo.input)
                             }
 
                         } else if (newInfo[infosToChange[i]] == null) {        // Boolean values manager
