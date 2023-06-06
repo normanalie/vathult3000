@@ -2,6 +2,7 @@
  *  - MQTT "connect" event
  */
 
+const eventLogger = require('../../misc/eventLogger');
 const { mqttTopicBase } = require('../misc/mqttConfig.json');
 
 module.exports = (mqttApp) => {
@@ -10,7 +11,7 @@ module.exports = (mqttApp) => {
 
         eventLogger("MQTT", "i", "MQTT connection established", "");
     
-        const mqttTopic = `${mqttTopicBase}/+`
+        const mqttTopic = `${mqttTopicBase}/#`
     
         mqttApp.subscribe([mqttTopic], (err) => {
     

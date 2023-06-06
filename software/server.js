@@ -19,6 +19,7 @@ const mqtt = require('mqtt');
 const mqttLogID = require('./mqtt-log-id.json');
 const mqttConnect = require('./src/mqtt/events/connect');
 const mqttMessage = require('./src/mqtt/events/message');
+const { mqttTopicBase } = require('./src/mqtt/misc/mqttConfig.json');
 // Misc.
 const eventLogger = require('./src/misc/eventLogger');
 
@@ -395,6 +396,28 @@ app.post('/device/:deviceID/setoutputs/', checkAuthenticated, (req, res) => {  /
                     eventLogger("MySQL", "ERROR!", `Unable to update Vathults datas (SN: ${results[0].serial_number})`, "");
                     console.log(err);
                 } else {
+
+                    for (i=0; i<infosToChange.length; i++) {     //  Check info sent by the form
+                        
+                        if (infosToChange[i] == "input") {       //  Non boolean values manager (On pourra mettre un Switch a la place si y'en a plus a l'avenir)
+                            
+                            if (newInfo.input == null) {
+                                newInfo.input = results[0].input
+                                console.log(newInfo.input)
+                            }
+
+                        } else if (newInfo[infosToChange[i]] == null) {        // Boolean values manager
+                            newInfo[infosToChange[i]] = results[0][infosToChange[i]];
+                        }
+                    };
+
+                    mqttApp.publish(`${mqttTopicBase}/${results[0].serial_number}/set`, JSON.stringify(newInfo), { qos: 0, retain: false }, (error) => {    // Send MQTT message to ESP32
+                        if (error) {
+                            eventLogger("MQTT", "ERROR!", `Failed to send data to topic(s) [${mqttTopic}]`, "");
+                            console.error(error)
+                        }
+                    });
+
                     eventLogger("MySQL", "i", `Vathults Data successfully updated (SN: ${results[0].serial_number})`, "");
                     res.redirect(`/device/${req.params.deviceID}`);
                 }

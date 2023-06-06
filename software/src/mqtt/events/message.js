@@ -16,7 +16,7 @@ module.exports = (mqttApp, db) => {
     
         const devicetype = topic.split('/')[0];
     
-        if (devicetype == mqttTopicBase && topic != `${mqttTopicBase}/TEST`) {
+        if (devicetype == mqttTopicBase && topic != `${mqttTopicBase}/TEST` && topic.split('/')[2] != "set") {
             const serialNumber = topic.slice(12);
             message = JSON.parse(message);
     
