@@ -20,7 +20,8 @@ class MQTT: public PubSubClient{
     void setup();
     bool reconnect();
     void send();
-    void get();
+    bool get_input();
+    void get_outputs(bool outputs[4]);
   private:
     String construct_message();
     String get_input_state();

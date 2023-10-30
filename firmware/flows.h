@@ -13,7 +13,7 @@ void IRAM_ATTR pulse_ISR();
 class Flows{
   public:
     Flows(uint8_t pin);
-    uint8_t read_pin(uint8_t pin, uint8_t timeout_ms);
+    uint8_t read_L_per_min(uint8_t pin, uint8_t timeout_ms);
     /* void read_states(int16_t state[], uint8_t timeout_ms);  == DEPRECATED due to new hardware architecture. == */
   private:
     uint8_t pin;

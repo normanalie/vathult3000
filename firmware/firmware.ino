@@ -55,19 +55,21 @@ void index_html();
 
 
 void setup(){
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(1500);
   Serial.println("=========== VATHULT3000 ==========");
+  Serial.println("Starting...");
   setup_io();
   setup_wifi();
   mqtt_client.setup();
+  Serial.println("Done.");
 }
 
+static unsigned long t100 = millis();
 void loop(){
   wm.process();  // WiFi non-blocking loop
 
-  static unsigned long t = millis();
-  if(millis()-t > 100){
+  if(millis()-t100 > 100){
     // Update WiFi Status
     if(wm.getWLStatusString() == "WL_CONNECTED"){  // WiFi connected 
       states[STATE_WIFI] = 1;
@@ -76,7 +78,23 @@ void loop(){
     }
     // Update MQTT
     if(states[STATE_WIFI]){
-      mqtt_client.reconnect();
+      if(mqtt_client.connected()){
+        mqtt_client.loop();
+        mqtt_client.send();
+        if(mqtt_client.get_input() == 0){
+          states[STATE_SOURCE] = SOURCE_TAP;
+        }else{
+          states[STATE_SOURCE] = SOURCE_RAIN;
+        }
+        bool outs_states[4];
+        mqtt_client.get_outputs(outs_states);
+        states[STATE_OUTPUT1] = outs_states[0];
+        states[STATE_OUTPUT2] = outs_states[1];
+        states[STATE_OUTPUT3] = outs_states[2];
+        states[STATE_OUTPUT4] = outs_states[3];
+      }else{
+        mqtt_client.reconnect();
+      }
     }
     // Update Pump status
     if(states[STATE_SOURCE] == SOURCE_TAP){
@@ -87,9 +105,10 @@ void loop(){
     // Update Outputs status
     actuators.write_states(states);
     // Update flow sensor
-    states[STATE_FLOW] = flow.read_pin(FLOW_PIN, 100);
+    states[STATE_FLOW] = flow.read_L_per_min(FLOW_PIN, 100);
     // Update infiltration sensor
     states[STATE_INFILTRATION] = analogRead(INFILTRATION_PIN);
+    t100 = millis();
   }
 }
 
@@ -99,19 +118,26 @@ void setup_io(){
 }
 
 void setup_wifi(){
-  WiFi.mode(WIFI_STA);  // For sanity
-  setup_captive_portal();
+  //WiFi.mode(WIFI_STA);  // For sanity
+  //setup_captive_portal();
+  WiFi.begin("GuadoDex's Galaxy A53 5G");
+  /*
+  while(WiFi.begin("GuadoDex's Galaxy A53 5G") == 6){
+  Serial.println("Waiting wifi...");
+  delay(1000);
+  }*/
+
 }
 
 void setup_captive_portal(){
     wm.setConfigPortalBlocking(false); 
-    wm.setAPStaticIPConfig(IPAddress(192,168,1,1), IPAddress(192,168,1,1), IPAddress(255,255,255,0));  // Capttive portal IP
+    //wm.setAPStaticIPConfig(IPAddress(192,168,1,1), IPAddress(192,168,1,1), IPAddress(255,255,255,0));  // Capttive portal IP
     // UI
     wm.setTitle("VATHULT3000");
     wm.setClass("invert");  // Captive-portal dark theme
     const char* wm_menu[] = {"wifi","sep","restart","exit"};  // Captive portal menu buttons (sep = separator)
     wm.setMenu(wm_menu, 4);
     // Start
-    states[STATE_WIFI] = wm.autoConnect("VATHULT3000_Setup");
+    states[STATE_WIFI] = wm.autoConnect("VATHULT_Setup");
     return;
 }

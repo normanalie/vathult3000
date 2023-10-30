@@ -1,0 +1,213 @@
+esphome:
+  name: vathult3000
+  friendly_name: VATHULT3000
+
+esp32:
+  board: esp32-s2-saola-1
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "vs1IGQ8FYz3/lHa893s4SlBcSmY5QBozSOYAbzKzNv4="
+
+ota:
+  password: "da74443b6fc294f087b3a6b1a2b5aa09"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Vathult3000 Fallback Hotspot"
+    password: "kjYWpd9FpP00"
+
+captive_portal:
+    
+i2c:
+  sda: 5
+  scl: 6
+  scan: true
+
+pcf8574:
+  - id: 'pcf8574_actuators'
+    address: 0x20
+    pcf8575: false
+
+# Individual outputs
+switch:
+  - platform: gpio
+    id: tap_valve
+    name: "TAP in"
+    internal: true
+    pin:
+      pcf8574: pcf8574_actuators
+      number: 0
+      mode:
+        output: true
+      inverted: true
+    on_turn_on:
+      - switch.turn_off: rain_valve
+      - select.set:
+          id: input
+          option: "TAP"
+  - platform: gpio
+    id: rain_valve
+    name: "RAIN in"
+    internal: true
+    pin:
+      pcf8574: pcf8574_actuators
+      number: 1
+      mode:
+        output: true
+      inverted: true
+    on_turn_on:
+      - switch.turn_off: tap_valve
+      - switch.turn_on: pump
+      - select.set:
+          id: input
+          option: "RAIN"
+    on_turn_off:
+      - switch.turn_off: pump
+  - platform: gpio
+    id: out1
+    name: "OUT 1"
+    pin:
+      pcf8574: pcf8574_actuators
+      number: 2
+      mode:
+        output: true
+      inverted: true
+  - platform: gpio
+    id: out2
+    name: "OUT 2"
+    pin:
+      pcf8574: pcf8574_actuators
+      number: 3
+      mode:
+        output: true
+      inverted: true
+  - platform: gpio
+    id: out3
+    name: "OUT 3"
+    pin:
+      pcf8574: pcf8574_actuators
+      number: 4
+      mode:
+        output: true
+      inverted: true
+  - platform: gpio
+    id: out4
+    name: "OUT 4"
+    pin:
+      pcf8574: pcf8574_actuators
+      number: 5
+      mode:
+        output: true
+      inverted: true
+  - platform: gpio
+    id: pump
+    name: "PUMP"
+    internal: true
+    pin:
+      pcf8574: pcf8574_actuators
+      number: 6
+      mode:
+        output: true
+      inverted: true
+  
+sensor:
+  - platform: pulse_counter
+    id: flow_dashboard
+    name: "Flow meter"
+    pin: 4
+    update_interval: 5s
+    filters:
+    - lambda: return (x / 45.0);
+    unit_of_measurement: "L/min" 
+  - platform: pulse_counter
+    id: flow
+    name: "Flow meter"
+    pin: 4
+    update_interval: 15s
+    filters:
+    - lambda: return (x / 45.0);
+    unit_of_measurement: "L/min" 
+    on_value:
+      then:
+        - if:  # If there is no more flow and some inputs are open (watering in progress)
+            condition:
+              lambda: 'return id(flow).state < 1.0 && (id(rain_valve).state || id(tap_valve).state);'
+            then:
+              - if:  # If we use water from tap -> Close all
+                  condition:
+                    lambda: 'return id(tap_valve).state;'
+                  then:
+                    - select.set:
+                        id: input
+                        option: "OFF"
+              - if:  # If we are using water from rain -> Switch to tap
+                  condition:
+                    lambda: 'return id(rain_valve).state;' 
+                  then:
+                    - select.set:
+                        id: input
+                        option: "TAP"
+    
+binary_sensor:
+  - platform: template
+    internal: True
+    id: outs_closed
+    name: "All Outs closed"
+    lambda: |-
+      if (!id(out1).state && !id(out2).state && !id(out3).state && !id(out4).state) {
+        return true;
+      } else {
+        return false;
+      }
+    on_state:
+      then:
+        - if:
+            condition:
+              lambda: 'return id(outs_closed).state;'
+            then:
+              - select.set:
+                  id: input
+                  option: "OFF" 
+
+select:
+  - platform: template
+    name: "Input"
+    id: input
+    options:
+     - "OFF"
+     - "RAIN"
+     - "TAP"
+    initial_option: "OFF"
+    optimistic: true
+    on_value:
+      - if:
+          condition:
+            lambda: 'return id(input).state == "OFF";'
+          then:
+            - switch.turn_off: tap_valve
+            - switch.turn_off: rain_valve
+      - if:
+          condition:
+            lambda: 'return id(input).state == "RAIN";'
+          then:
+            - switch.turn_on: rain_valve
+      - if:
+          condition:
+            lambda: 'return id(input).state == "TAP";'
+          then:
+            - switch.turn_on: tap_valve
+    set_action:
+      - logger.log:
+          format: "Chosen option: %s"
+          args: ["x.c_str()"]
