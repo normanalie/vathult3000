@@ -10,6 +10,11 @@ The VÂTHULT3000 is based on an ESP32. It communicates with a server through a A
 
 This first prototype uses solenoid valves and 5 different PCBs. It has been designed to be simple to implement and simple to modify. Cost and size are not constraints.
 
+## Home Assistant integration
+Import the .yaml file into your ESPHome dashboard and flash the ESP.
+After adoption you'lle have:
+![Vathult in Home Assistant](V3K_ESPHOME.png?raw=true)
+
 ## How to use?
 TODO.
 
